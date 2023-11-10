@@ -29,6 +29,7 @@ def execute(task):
     # Exec Bash Script
     # Await Response
     # Insert in DB
+    # Remove task directory
     pass
 
 user_queue = UserQueue()

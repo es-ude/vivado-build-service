@@ -1,6 +1,6 @@
 from simulationflow.filehandler import process_request
 from simulationflow.taskhandler import user_queue
-from simulationflow.macutil import split_stream
+from simulationflow.streamutil import split_stream
 
 from docs.config import Config
 import socketserver

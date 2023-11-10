@@ -1,5 +1,4 @@
 from simulationflow.filehandler import prepare_request
-from simulationflow.macutil import get_mac_address as mac_address
 from docs.config import Config
 import socket
 import sys
@@ -7,9 +6,11 @@ import sys
 config = Config().get()
 chunk_size = config['chunk size']
 delimiter = config['delimiter'].encode()
+username = sys.argv[1]
+request = prepare_request(sys.argv[2:], username)
 
 HOST, PORT = config['host'], config['port']
-data = delimiter.join([mac_address(), prepare_request(sys.argv[1:])])
+data = delimiter.join([username.encode(), request])
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     sock.connect((HOST, PORT))
