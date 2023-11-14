@@ -27,5 +27,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
 
 """ Example build directory:
 ../Elasic-Ai-Workflow-Demo/ElasticAI-Workflow-Demo/build_20
-00:16:3e:99:0b:db
 """

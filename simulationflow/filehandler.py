@@ -1,5 +1,6 @@
 from zipfile import ZipFile
 from docs.config import Config
+import shutil
 import os
 
 config = Config().get()
@@ -24,6 +25,7 @@ def prepare_request(directories, user):  # Client
     # except Exception as e:
     #     print("An error occurred: {}".format(e))
 
+
 def process_request(data, user):  # Server
     # try:
         task_dir = make_personal_dir(user, receive_dir)
@@ -37,7 +39,6 @@ def process_request(data, user):  # Server
         
     # except Exception as e:
     #     print("An error occurred: {}".format(e))
-    #     e.with_traceback()
 
 
 def make_personal_dir(user, directory):
@@ -66,26 +67,46 @@ def get_filepaths(directory):
     return file_list
 
 
-def serialize(filepath):
-    with open(filepath, 'rb') as file:
-        return file.read()
+def serialize(file):
+    with open(file, 'rb') as f:
+        return f.read()
 
 
-def deserialize(binary, destination):
+def deserialize(stream, destination):
     with open(destination, 'wb') as file:
-        file.write(binary)
+        file.write(stream)
 
 
-def pack(filepaths, destination):
+def pack(origin, destination):
     with ZipFile(destination, 'w') as archive:
-        for filepath in filepaths:
+        for filepath in origin:
             archive.write(filepath, arcname=filepath.split('\\')[-1])
             print("Sent '{}'".format(filepath.split('\\')[-1]))
 
 
-def unpack(filepath, destination):
-    with ZipFile(filepath, 'r') as archive:
+def unpack(origin, destination):
+    with ZipFile(origin, 'r') as archive:
         for file in archive.filelist:
             archive.extract(file, destination)
             print("Added '{}'".format(file.filename))
         print('\n')
+
+
+def clear(directory):
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+
+            if file == 'info.md':
+                continue
+
+            os.unlink(os.path.join(root, file))
+            print("Removed '{}'".format(file))
+
+        for _dir in dirs:
+            shutil.rmtree(os.path.join(root, _dir))
+            print("Removed directory '{}'".format(_dir))
+
+def remove(directory):
+    shutil.rmtree(directory)
+
+    

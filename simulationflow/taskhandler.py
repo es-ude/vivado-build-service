@@ -1,3 +1,5 @@
+from simulationflow.filehandler import remove
+import subprocess
 import threading
 
 class UserQueue:
@@ -25,12 +27,20 @@ class UserQueue:
         return task
 
 def execute(task):
-    print("Executing Task '{}'".format(task), end='\n\n')
-    # Exec Bash Script
-    # Await Response
-    # Insert in DB
-    # Remove task directory
-    pass
+    client_id = task.split('/')[-2]
+    task_id = task.split('/')[-1]
+
+    print("Handling task for {}: Task nr. {}".format(client_id, task_id), end='\n\n')
+    
+    subprocess.run(['C:/Windows/System32/wsl.exe', './bash/test.sh'])
+    # subprocess.run('./bash/test.sh')
+
+    # Implement:
+    # Send *bin file and tcl script back to client
+    # Insert data in DB
+
+    print("Task done for {}: Task nr. {}".format(client_id, task_id), end='\n\n')
+    remove(task)
 
 user_queue = UserQueue()
 
@@ -41,10 +51,6 @@ def worker():
         if task is None:
             continue
 
-        client_id = task.split('/')[-2]
-        task_id = task.split('/')[-1]
-
-        print("Handling task for {}: Task nr. {}".format(client_id, task_id), end='\n\n')
         execute(task)
 
 threading.Thread(target=worker, daemon=True).start()
