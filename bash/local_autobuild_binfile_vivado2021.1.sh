@@ -23,7 +23,7 @@ mkdir /home/$1/.autobuild/tcl_script; cp /home/$1/.autobuild_script/create_proje
 
 
 # ---------------
-# Done in python:
+# Done in python (?):
 
 # Copy folders back to your machine
 # scp -r $1@$2:/home/$1/.autobuild/ $4

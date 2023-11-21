@@ -22,5 +22,8 @@ class Config:
 
             # VNC
             'username': self.config.get('VNC', 'username'),
-            'ip address': self.config.get('VNC', 'ip address')
+            'ip address': self.config.get('VNC', 'ip address'),
+
+            # Database
+            'DB URL': self.config.get('Database', 'DB URL')
         }
