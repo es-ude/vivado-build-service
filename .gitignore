@@ -1,1 +1,2 @@
-docs/config.ini
+docs/*.ini
+*.pyc

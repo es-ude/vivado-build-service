@@ -1,6 +1,9 @@
-from simulationflow.filehandler import remove
+from docs.config import Config
+from simulationflow.filehandler import remove, prepare_request
 import subprocess
 import threading
+
+config = Config().get()
 
 class UserQueue:
     def __init__(self):
@@ -29,11 +32,14 @@ class UserQueue:
 def execute(task):
     client_id = task.split('/')[-2]
     task_id = task.split('/')[-1]
+    arguments = [config['username'], config['ip address'], task]
 
     print("Handling task for {}: Task nr. {}".format(client_id, task_id), end='\n\n')
     
     subprocess.run(['C:/Windows/System32/wsl.exe', './bash/test.sh'])
-    # subprocess.run('./bash/test.sh')
+    # subprocess.run(['./bash/local_autobuild_binfile_vivado2021.1.sh'] + arguments)
+
+    data = prepare_request(['/home/' + config['username'] + '/.autobuild/output'], client_id)
 
     # Implement:
     # Send *bin file and tcl script back to client
