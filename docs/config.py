@@ -9,12 +9,18 @@ class Config:
 
     def get(self):
         return {
+            # Paths
+            'send': self.config.get('Paths', 'send'),
+            'receive': self.config.get('Paths', 'receive'),
+            'request': self.config.get('Paths', 'request'),
+
+            # Connection
             'host': self.config.get('Connection', 'host'),
             'port': self.config.getint('Connection', 'port'),
             'chunk size': self.config.getint('Connection', 'chunk size'),
             'delimiter': self.config.get('Connection', 'delimiter'),
 
-            'send': self.config.get('Paths', 'send'),
-            'receive': self.config.get('Paths', 'receive'),
-            'request': self.config.get('Paths', 'request')
+            # VNC
+            'username': self.config.get('VNC', 'username'),
+            'ip address': self.config.get('VNC', 'ip address')
         }
