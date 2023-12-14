@@ -20,7 +20,21 @@ def prepare_request(directories, user):  # Client
         filepath = '/'.join([task_dir, filename])
         pack(file_list, filepath)
 
-        return serialize(filepath)
+        return serialize(filepath), task_dir
+
+    # except Exception as e:
+    #     print("An error occurred: {}".format(e))
+
+
+def process_response(data, task_dir):
+    # try:
+        result_dir = task_dir + '/result'
+        filepath = result_dir + '/result.zip'
+
+        os.mkdir(result_dir)
+        deserialize(data, filepath)
+        unpack(filepath, result_dir)
+        os.remove(filepath)
 
     # except Exception as e:
     #     print("An error occurred: {}".format(e))
@@ -37,6 +51,21 @@ def process_request(data, user):  # Server
 
         return task_dir
         
+    # except Exception as e:
+    #     print("An error occurred: {}".format(e))
+
+
+def prepare_response(result_directory):
+    # try:
+        infofile = '/'.join([result_directory, 'completed.txt'])
+        os.remove(infofile)
+
+        files = get_filepaths(result_directory)
+        filepath = '/'.join([result_directory, 'result.zip'])
+        pack(files, filepath)
+
+        return serialize(filepath)
+
     # except Exception as e:
     #     print("An error occurred: {}".format(e))
 
@@ -85,6 +114,7 @@ def pack(origin, destination):
 
 
 def unpack(origin, destination):
+    print(origin)
     with ZipFile(origin, 'r') as archive:
         for file in archive.filelist:
             archive.extract(file, destination)
@@ -106,7 +136,20 @@ def clear(directory):
             shutil.rmtree(os.path.join(root, _dir))
             print("Removed directory '{}'".format(_dir))
 
+
+def reset():
+    clear(send_dir)
+    clear(receive_dir)
+
+
 def remove(directory):
     shutil.rmtree(directory)
 
+
+def create_file(filename, directory):
+    os.mkdir(directory)
+    filepath = '/'.join([directory, filename])
     
+    with open(filepath, 'a'):
+        pass
+        
