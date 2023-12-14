@@ -1,15 +1,18 @@
 from docs.config import Config
-from simulationflow.filehandler import remove, prepare_request
+from simulationflow.filehandler import create_file
 import subprocess
 import threading
 
 config = Config().get()
+task_is_finished = False
 
 class UserQueue:
     def __init__(self):
         self.user_queues = {}
     
     def enqueue_task(self, task):
+        print("TEST 2")
+        
         client_id = task.split('/')[-2]
 
         if client_id not in self.user_queues:
@@ -30,23 +33,23 @@ class UserQueue:
         return task
 
 def execute(task):
+    print("TEST 1")
+    
     client_id = task.split('/')[-2]
     task_id = task.split('/')[-1]
-    arguments = [config['username'], config['ip address'], task]
+    result_dir = task + '/result'
+    bash_arguments = [config['username'], config['ip address'], task, result_dir]
 
     print("Handling task for {}: Task nr. {}".format(client_id, task_id), end='\n\n')
     
     subprocess.run(['C:/Windows/System32/wsl.exe', './bash/test.sh'])
-    # subprocess.run(['./bash/local_autobuild_binfile_vivado2021.1.sh'] + arguments)
-
-    data = prepare_request(['/home/' + config['username'] + '/.autobuild/output'], client_id)
+    create_file('completed.txt', result_dir)
+    # subprocess.run(['./bash/local_autobuild_binfile_vivado2021.1.sh'] + bash_arguments)
 
     # Implement:
-    # Send *bin file and tcl script back to client
     # Insert data in DB
 
     print("Task done for {}: Task nr. {}".format(client_id, task_id), end='\n\n')
-    remove(task)
 
 user_queue = UserQueue()
 
@@ -59,4 +62,6 @@ def worker():
 
         execute(task)
 
-threading.Thread(target=worker, daemon=True).start()
+thread = threading.Thread(target=worker)
+thread.daemon = True
+thread.start()
