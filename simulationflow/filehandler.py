@@ -1,18 +1,24 @@
-from zipfile import ZipFile
 from docs.config import Config
+
+from zipfile import ZipFile
 import shutil
+import logging
 import os
+
+logging.getLogger().setLevel(logging.INFO)
 
 config = Config().get()
 
-send_dir, receive_dir, filename = config['send'], config['receive'], config['request']
+send_dir = config['send']
+receive_dir = config['receive']
+filename = config['request']
+
 send_file = '/'.join([send_dir, filename])
 
-
 def prepare_request(directories, user):  # Client
+    try:
         file_list = []
 
-    # try:
         for directory in directories:
             file_list += get_filepaths(directory)
         
@@ -22,12 +28,12 @@ def prepare_request(directories, user):  # Client
 
         return serialize(filepath), task_dir
 
-    # except Exception as e:
-    #     print("An error occurred: {}".format(e))
+    except Exception as e:
+        logging.error("An error occurred: {}".format(e))
 
 
 def process_response(data, task_dir):
-    # try:
+    try:
         result_dir = task_dir + '/result'
         filepath = result_dir + '/result.zip'
 
@@ -36,12 +42,12 @@ def process_response(data, task_dir):
         unpack(filepath, result_dir)
         os.remove(filepath)
 
-    # except Exception as e:
-    #     print("An error occurred: {}".format(e))
+    except Exception as e:
+        logging.error("An error occurred: {}".format(e))
 
 
-def process_request(data, user):  # Server
-    # try:
+def process_request(data, user): # Server
+    try:
         task_dir = make_personal_dir(user, receive_dir)
         filepath = '/'.join([task_dir, filename])
         
@@ -51,12 +57,12 @@ def process_request(data, user):  # Server
 
         return task_dir
         
-    # except Exception as e:
-    #     print("An error occurred: {}".format(e))
+    except Exception as e:
+        logging.error("An error occurred: {}".format(e))
 
 
 def prepare_response(result_directory):
-    # try:
+    try:
         infofile = '/'.join([result_directory, 'completed.txt'])
         os.remove(infofile)
 
@@ -66,8 +72,8 @@ def prepare_response(result_directory):
 
         return serialize(filepath)
 
-    # except Exception as e:
-    #     print("An error occurred: {}".format(e))
+    except Exception as e:
+        logging.error("An error occurred: {}".format(e))
 
 
 def make_personal_dir(user, directory):
@@ -110,7 +116,8 @@ def pack(origin, destination):
     with ZipFile(destination, 'w') as archive:
         for filepath in origin:
             archive.write(filepath, arcname=filepath.split('\\')[-1])
-            print("Sent '{}'".format(filepath.split('\\')[-1]))
+            logging.info("Sending '{}'".format(filepath.split('\\')[-1]))
+        print('\n')
 
 
 def unpack(origin, destination):
@@ -118,14 +125,13 @@ def unpack(origin, destination):
     with ZipFile(origin, 'r') as archive:
         for file in archive.filelist:
             archive.extract(file, destination)
-            print("Added '{}'".format(file.filename))
+            logging.info("Added '{}'".format(file.filename))
         print('\n')
 
 
 def clear(directory):
     for root, dirs, files in os.walk(directory):
         for file in files:
-
             if file == 'info.md':
                 continue
 
@@ -152,4 +158,4 @@ def create_file(filename, directory):
     
     with open(filepath, 'a'):
         pass
-        
+         
