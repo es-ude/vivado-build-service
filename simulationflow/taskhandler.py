@@ -4,6 +4,7 @@ from docs.config import Config
 import subprocess
 import threading
 import logging
+import os
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -42,12 +43,11 @@ def execute(task):
     client_id = task.split('/')[-2]
     task_id = task.split('/')[-1]
     result_dir = task + '/result'
-    bash_arguments = [config['username'], config['ip address'], task, result_dir]
+    bash_arguments = [config['username'], os.path.abspath(config['tcl script']), os.path.abspath(task), os.path.abspath(result_dir)]
 
     logging.info("Handling task for {}: Task nr. {}".format(client_id, task_id), end='\n\n')
     
-    subprocess.run(['C:/Windows/System32/wsl.exe', './bash/test.sh'])
-    # subprocess.run(['./bash/local_autobuild_binfile_vivado2021.1.sh'] + bash_arguments)
+    subprocess.run(['./bash/local_autobuild_binfile_vivado2021.1.sh'] + bash_arguments)
 
     # Implement:
     # Insert data in DB

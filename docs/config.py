@@ -13,6 +13,7 @@ class Config:
             'send': self.config.get('Paths', 'send'),
             'receive': self.config.get('Paths', 'receive'),
             'request': self.config.get('Paths', 'request'),
+            'tcl script': self.config.get('Paths', 'tcl script'),
 
             # Connection
             'host': self.config.get('Connection', 'host'),
