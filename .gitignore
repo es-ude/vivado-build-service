@@ -1,8 +1,7 @@
 # Default ignored files
 /shelf/
 /workspace.xml
-docs/*.ini
-*.ini
+docs/config.ini
 *.pyc
 # Editor-based HTTP Client requests
 /httpRequests/
