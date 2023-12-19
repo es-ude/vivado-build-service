@@ -2,9 +2,6 @@
 
 This tool is designed to automate Vivado simulations by enabling clients to submit their build files to a server over a socket connection.
 
-The client sends their build files using the following command:
-
-    python client.py {username} {directory}
 
 # Client-side Setup:
 
@@ -16,6 +13,7 @@ The client sends their build files using the following command:
 
     python client.py {username} {directory}
 
+
 # Server-side Setup:
 
   Modify the server configurations in docs/config.py as needed.
@@ -24,88 +22,102 @@ The client sends their build files using the following command:
 
     python server.py
 
+
 # Task Handling:
 
   The server handles incoming simulation tasks and distributes them to a task queue.
 
   The taskhandler.py script processes tasks in a separate thread, executing simulations and updating the result directory.
+  
 
 # Project Structure
 
-  client.py:
-      
-      Client script for submitting simulation build files to the server.
+<h3>client.py:</h3>
 
-  server.py:
-      
-      Server script for handling incoming simulation tasks and distributing them to the task queue.
+- Client script for submitting simulation build files to the server.
 
-  taskhandler.py:
-      
-      Manages the task queue and executes simulation tasks in a separate thread.
+<h3>server.py:</h3>
 
-  autobuild_binfile.sh:
-      
-      Bash script for automating Vivado simulations based on the provided build files.
+- Server script for handling incoming simulation tasks and distributing them to the task queue.
+
+<h3>taskhandler.py:</h3>
+
+- Manages the task queue and executes simulation tasks in a separate thread.
+
+<h3>autobuild_binfile.sh:</h3>
+
+- Bash script for automating Vivado simulations based on the provided build files.
+
 
 # Dependencies
 
-  The simulationflow module includes utility functions for file handling and task processing.
+The simulationflow module includes utility functions for file handling and task processing.
 
-  Configuration parameters are specified in docs/config.py.
+Configuration parameters are specified in docs/config.ini.
+
 
 # Configuration
 
-Ensure the configurations in docs/config.py are appropriately set for your environment before running the client and server.
+Ensure the configurations in docs/config.ini are appropriately set for your environment before running the client and server.
 
-# Paths
 
-  send:
+<h2>Paths</h2>
+
+<h3>send:</h3>
   
-    The directory path where the client looks for build files to send to the server.
+- The directory path where the client looks for build files to send to the server.
 
-  receive:
 
-    The directory path where the server expects to receive simulation-related files from the client.
+<h3>receive:</h3>
 
-  request:
+- The directory path where the server expects to receive simulation-related files from the client.
+
+
+<h3>request:</h3>
     
-    The name of the build file that the client sends to the server.
+- The name of the build file that the client sends to the server.
 
-  tcl script:
+
+<h3>tcl script:</h3>
   
-    The path to the TCL script (create_project_full_run.tcl) used in Vivado simulation.
+- The path to the TCL script (create_project_full_run.tcl) used in Vivado simulation.
 
-# Connection
 
-  chunk size:
+<h2>Connection</h2>
+
+<h3>chunk size:</h3>
     
-    The size of data chunks used during communication between the client and server.
+- The size of data chunks used during communication between the client and server.
 
-  delimiter:
+
+<h3>delimiter:</h3>
   
-    A value used to delimit different pieces of data in communication.
+- A value used to delimit different pieces of data in communication.
 
-  host:
+
+<h3>host:</h3>
     
-    The hostname or IP address of the server.
+- The hostname or IP address of the server.
 
-  port:
+
+<h3>port:</h3>
     
-    The port number on which the server listens for incoming connections.
+- The port number on which the server listens for incoming connections.
 
- # VNC
+<h2>VNC</h2>
 
-  username:
+<h3>username:</h3>
   
-    The username used for a VNC connection.
+- The username used for a VNC connection.
 
-  ip address:
+
+<h3>ip address:</h3>
    
-    The IP address associated with the VNC connection.
+- The IP address associated with the VNC connection.
 
- # Database
 
-   DB URL:
+<h2>Database</h2>
+
+<h3>DB URL:</h3>
      
-    The URL or connection string for the database.
+- The URL or connection string for the database.
