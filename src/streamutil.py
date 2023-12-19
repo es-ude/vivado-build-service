@@ -9,6 +9,14 @@ def find_delimiter_index(stream):
             return i
         
 
+def end_reached(stream):
+    return stream[-len(delimiter):] == delimiter
+
+
+def remove_delimiter(data):
+    return data[:-len(delimiter)]
+
+
 def get_username(stream):
     return stream[:find_delimiter_index(stream)].decode()
 

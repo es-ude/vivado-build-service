@@ -1,6 +1,6 @@
-from simulationflow.filehandler import process_request, prepare_response
-from simulationflow.taskhandler import user_queue
-from simulationflow.streamutil import split_stream
+from src.filehandler import process_request, prepare_response
+from src.streamutil import split_stream, end_reached, remove_delimiter
+from src.taskhandler import user_queue
 from docs.config import Config
 
 import socketserver
@@ -23,13 +23,14 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
             chunk = self.request.recv(chunk_size)
             data += chunk
 
-            if len(chunk) < chunk_size: # bad condition change later
+            if len(chunk) < chunk_size or end_reached(chunk):
                 break
 
             if not client_address:
                 client_address, stream = split_stream(data)
                 data = stream
  
+        data = remove_delimiter(data)
         logging.info("Receiving data from '{}'.".format(client_address))
 
         task_directory = process_request(data, client_address)
@@ -48,6 +49,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
             chunk = response[i:i + chunk_size]
             self.request.sendall(chunk)
 
+        os.rmdir(task_directory)
         self.request.close()
 
 
