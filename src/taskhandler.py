@@ -11,10 +11,10 @@ logging.getLogger().setLevel(logging.INFO)
 config = Config().get()
 task_is_finished = False
 
+
 class UserQueue:
     def __init__(self):
         self.user_queues = {}
-    
 
     def enqueue_task(self, task):
         client_id = task.split('/')[-2]
@@ -23,7 +23,6 @@ class UserQueue:
             self.user_queues[client_id] = []
 
         self.user_queues[client_id].append(task)
-    
 
     def dequeue_task(self):
         if not self.user_queues:
@@ -58,6 +57,7 @@ def execute(task):
 
 
 user_queue = UserQueue()
+
 
 def worker():
     while True:

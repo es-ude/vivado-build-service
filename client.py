@@ -1,4 +1,4 @@
-from simulationflow.filehandler import prepare_request, process_response, reset
+from src.filehandler import prepare_request, process_response, reset
 from docs.config import Config
 
 import logging
@@ -16,7 +16,7 @@ delimiter = config['delimiter'].encode()
 try:
     username = sys.argv[1]
     directories = sys.argv[2:]
-except: # Debug Mode
+except:  # Debug Mode
     reset()
     username = 'debug'
     directories = ['../Elasic-Ai-Workflow-Demo/ElasticAI-Workflow-Demo/build_20']
@@ -25,6 +25,7 @@ request, task_dir = prepare_request(directories, username)
 
 HOST, PORT = config['host'], config['port']
 data = delimiter.join([username.encode(), request])
+
 
 def create_socket():
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)

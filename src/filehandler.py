@@ -15,6 +15,7 @@ filename = config['request']
 
 send_file = '/'.join([send_dir, filename])
 
+
 def prepare_request(directories, user):  # Client
     try:
         file_list = []
@@ -46,7 +47,7 @@ def process_response(data, task_dir):
         logging.error("An error occurred: {}".format(e))
 
 
-def process_request(data, user): # Server
+def process_request(data, user):  # Server
     try:
         task_dir = make_personal_dir(user, receive_dir)
         filepath = '/'.join([task_dir, filename])
@@ -63,8 +64,8 @@ def process_request(data, user): # Server
 
 def prepare_response(result_directory):
     try:
-        infofile = '/'.join([result_directory, 'completed.txt'])
-        os.remove(infofile)
+        info_file = '/'.join([result_directory, 'completed.txt'])
+        os.remove(info_file)
 
         files = get_filepaths(result_directory)
         filepath = '/'.join([result_directory, 'result.zip'])
@@ -80,7 +81,7 @@ def make_personal_dir(user, directory):
     client_dirs = os.listdir(directory)
     client_dir = '/'.join([directory, user])
 
-    if not user in client_dirs:
+    if user not in client_dirs:
         os.mkdir(client_dir)
         queue_priority = 1
     else:        
@@ -152,9 +153,9 @@ def remove(directory):
     shutil.rmtree(directory)
 
 
-def create_file(filename, directory):
+def create_file(file, directory):
     os.mkdir(directory)
-    filepath = '/'.join([directory, filename])
+    filepath = '/'.join([directory, file])
     
     with open(filepath, 'a'):
         pass

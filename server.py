@@ -37,10 +37,10 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         user_queue.enqueue_task(task=task_directory)
 
         result_directory = task_directory + '/result'
-        infofile_path = result_directory + '/completed.txt'
+        info_file_path = result_directory + '/completed.txt'
 
         while True:
-            if os.path.isfile(infofile_path):
+            if os.path.isfile(info_file_path):
                 break
         
         response = prepare_response(result_directory)

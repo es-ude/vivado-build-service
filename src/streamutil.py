@@ -3,6 +3,7 @@ from docs.config import Config
 config = Config().get()
 delimiter = config['delimiter'].encode()
 
+
 def find_delimiter_index(stream):
     for i in range(len(stream)):
         if stream[i:i+len(delimiter)] == delimiter:
