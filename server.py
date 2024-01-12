@@ -6,6 +6,7 @@ from docs.config import Config
 import socketserver
 import threading
 import logging
+import shutil
 import os
 
 logging.getLogger().setLevel(logging.INFO)
@@ -49,7 +50,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
             chunk = response[i:i + chunk_size]
             self.request.sendall(chunk)
 
-        os.rmdir(task_directory)
+        shutil.rmtree(task_directory)
         self.request.close()
 
 

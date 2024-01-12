@@ -5,9 +5,9 @@
 
 
 # STEP#1: setup design sources and constraints
-create_project project_1 /home/es-admin/.autobuild/vivado_project -part xc7s15ftgb196-2 -force
-add_files /home/es-admin/.autobuild/input_srcs/srcs
-add_files -fileset constrs_1 -norecurse /home/es-admin/.autobuild/input_srcs/constraints/env5_config.xdc
+create_project project_1 /home/dominik/.autobuild/vivado_project -part xc7s15ftgb196-2 -force
+add_files /home/dominik/.autobuild/input_srcs/srcs
+add_files -fileset constrs_1 -norecurse /home/dominik/.autobuild/input_srcs/constraints/env5_config.xdc
 update_compile_order -fileset sources_1
 
 # STEP#2: run synthesis

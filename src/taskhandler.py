@@ -42,7 +42,7 @@ def execute(task):
     client_id = task.split('/')[-2]
     task_id = task.split('/')[-1]
     result_dir = task + '/result'
-    bash_arguments = [config['username'], os.path.abspath(config['tcl script']), os.path.abspath(task), os.path.abspath(result_dir)]
+    bash_arguments = [client_id, os.path.abspath(config['tcl script']), os.path.abspath(task), os.path.abspath(result_dir), os.path.abspath(config['constraints'])]
 
     logging.info("Handling task for {}: Task nr. {} \n".format(client_id, task_id))
     

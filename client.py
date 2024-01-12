@@ -24,7 +24,7 @@ except:  # Debug Mode
 request, task_dir = prepare_request(directories, username)
 
 HOST, PORT = config['host'], config['port']
-data = delimiter.join([username.encode(), request])
+data = delimiter.join([username.encode(), request]) + delimiter
 
 
 def create_socket():

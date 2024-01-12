@@ -14,6 +14,7 @@ class Config:
             'receive': self.config.get('Paths', 'receive'),
             'request': self.config.get('Paths', 'request'),
             'tcl script': self.config.get('Paths', 'tcl script'),
+            'constraints': self.config.get('Paths', 'constraints'),
 
             # Connection
             'host': self.config.get('Connection', 'host'),

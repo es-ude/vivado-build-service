@@ -17,7 +17,7 @@ send_file = '/'.join([send_dir, filename])
 
 
 def prepare_request(directories, user):  # Client
-    try:
+    # try:
         file_list = []
 
         for directory in directories:
@@ -29,12 +29,12 @@ def prepare_request(directories, user):  # Client
 
         return serialize(filepath), task_dir
 
-    except Exception as e:
+    # except Exception as e:
         logging.error("An error occurred: {}".format(e))
 
 
 def process_response(data, task_dir):
-    try:
+    # try:
         result_dir = task_dir + '/result'
         filepath = result_dir + '/result.zip'
 
@@ -43,13 +43,13 @@ def process_response(data, task_dir):
         unpack(filepath, result_dir)
         os.remove(filepath)
 
-    except Exception as e:
-        logging.error("An error occurred: {}".format(e))
+    # except Exception as e:
+    #     logging.error("An error occurred: {}".format(e))
 
 
 def process_request(data, user):  # Server
-    try:
-        task_dir = make_personal_dir(user, receive_dir)
+    # try:
+        task_dir = make_personal_dir(user, receive_dir)       
         filepath = '/'.join([task_dir, filename])
         
         deserialize(data, filepath)
@@ -58,12 +58,12 @@ def process_request(data, user):  # Server
 
         return task_dir
         
-    except Exception as e:
+    # except Exception as e:
         logging.error("An error occurred: {}".format(e))
 
 
 def prepare_response(result_directory):
-    try:
+    # try:
         info_file = '/'.join([result_directory, 'completed.txt'])
         os.remove(info_file)
 
@@ -73,7 +73,7 @@ def prepare_response(result_directory):
 
         return serialize(filepath)
 
-    except Exception as e:
+    # except Exception as e:
         logging.error("An error occurred: {}".format(e))
 
 
