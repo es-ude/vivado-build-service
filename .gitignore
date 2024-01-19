@@ -2,8 +2,8 @@
 /shelf/
 /workspace.xml
 /docs/config.ini
-/venv
-/.idea
+/venv/
+/.idea/
 
 /communications/server/*
 !communications/server/info.md
