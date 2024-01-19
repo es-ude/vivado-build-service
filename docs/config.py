@@ -14,6 +14,7 @@ class Config:
             'receive': self.config.get('Paths', 'receive'),
             'request': self.config.get('Paths', 'request'),
             'tcl script': self.config.get('Paths', 'tcl script'),
+            'bash script': self.config.get('Paths', 'bash script'),
             'constraints': self.config.get('Paths', 'constraints'),
 
             # Connection
@@ -27,5 +28,8 @@ class Config:
             'ip address': self.config.get('VNC', 'ip address'),
 
             # Database
-            'DB URL': self.config.get('Database', 'DB URL')
+            'DB URL': self.config.get('Database', 'DB URL'),
+
+            # Debug
+            'debug user': self.config.get('Debug', 'debug user')
         }
