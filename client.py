@@ -18,8 +18,8 @@ try:
     directories = sys.argv[2:]
 except:  # Debug Mode
     reset()
-    username = 'debug'
-    directories = ['../Elasic-Ai-Workflow-Demo/ElasticAI-Workflow-Demo/build_20']
+    username = 'dominik'
+    directories = ['../build_dir/srcs']
 
 request, task_dir = prepare_request(directories, username)
 
@@ -48,17 +48,20 @@ def create_socket():
 
         for s in writable:
             logging.info('sending...')
-            s.send(data)            
+            s.send(data)          
             logging.info('sent')
             outputs.remove(s)
 
         for s in readable:
             logging.info(f'reading...')
             chunk = s.recv(chunk_size)
+            if not chunk:
+                logging.info(f'closing...')
+                inputs.remove(s)
+                s.close()
+                break
+
             response += chunk
-            logging.info(f'closing...')
-            s.close()
-            inputs.remove(s)
             break
 
         for s in exceptional:
