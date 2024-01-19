@@ -6,7 +6,6 @@ from docs.config import Config
 import socketserver
 import threading
 import logging
-import shutil
 import os
 
 logging.getLogger().setLevel(logging.INFO)
@@ -14,6 +13,7 @@ logging.getLogger().setLevel(logging.INFO)
 config = Config().get()
 chunk_size = config['chunk size']
 
+class FileExists(Exception): pass
 
 class ThreadedTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
@@ -38,19 +38,21 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         user_queue.enqueue_task(task=task_directory)
 
         result_directory = task_directory + '/result'
-        info_file_path = result_directory + '/completed.txt'
 
         while True:
-            if os.path.isfile(info_file_path):
+            try:
+                for fname in os.listdir('.'):
+                    if fname.endswith('.bin'):
+                        raise FileExists
+            except FileExists:
                 break
-        
+
         response = prepare_response(result_directory)
 
         for i in range(0, len(response), chunk_size):
             chunk = response[i:i + chunk_size]
             self.request.sendall(chunk)
 
-        shutil.rmtree(task_directory)
         self.request.close()
 
 
