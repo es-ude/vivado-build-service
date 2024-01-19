@@ -17,38 +17,29 @@ send_file = '/'.join([send_dir, filename])
 
 
 def prepare_request(directories, user):  # Client
-    # try:
-        file_list = []
+    file_list = []
 
-        for directory in directories:
-            file_list += get_filepaths(directory)
-        
-        task_dir = make_personal_dir(user, send_dir)
-        filepath = '/'.join([task_dir, filename])
-        pack(file_list, filepath)
+    for directory in directories:
+        file_list += get_filepaths(directory)
+    
+    task_dir = make_personal_dir(user, send_dir)
+    filepath = '/'.join([task_dir, filename])
+    pack(file_list, filepath)
 
-        return serialize(filepath), task_dir
-
-    # except Exception as e:
-        logging.error("An error occurred: {}".format(e))
+    return serialize(filepath), task_dir
 
 
 def process_response(data, task_dir):
-    # try:
-        result_dir = task_dir + '/result'
-        filepath = result_dir + '/result.zip'
+    result_dir = task_dir + '/result'
+    filepath = result_dir + '/result.zip'
 
-        os.mkdir(result_dir)
-        deserialize(data, filepath)
-        unpack(filepath, result_dir)
-        os.remove(filepath)
-
-    # except Exception as e:
-    #     logging.error("An error occurred: {}".format(e))
+    os.mkdir(result_dir)
+    deserialize(data, filepath)
+    unpack(filepath, result_dir)
+    os.remove(filepath)
 
 
 def process_request(data, user):  # Server
-    # try:
         task_dir = make_personal_dir(user, receive_dir)       
         filepath = '/'.join([task_dir, filename])
         
@@ -57,24 +48,14 @@ def process_request(data, user):  # Server
         os.remove(filepath)
 
         return task_dir
-        
-    # except Exception as e:
-        logging.error("An error occurred: {}".format(e))
 
 
 def prepare_response(result_directory):
-    # try:
-        info_file = '/'.join([result_directory, 'completed.txt'])
-        os.remove(info_file)
+    files = get_filepaths(result_directory)
+    filepath = '/'.join([result_directory, 'result.zip'])
+    pack(files, filepath)
 
-        files = get_filepaths(result_directory)
-        filepath = '/'.join([result_directory, 'result.zip'])
-        pack(files, filepath)
-
-        return serialize(filepath)
-
-    # except Exception as e:
-        logging.error("An error occurred: {}".format(e))
+    return serialize(filepath)
 
 
 def make_personal_dir(user, directory):
@@ -116,9 +97,10 @@ def deserialize(stream, destination):
 def pack(origin, destination):
     with ZipFile(destination, 'w') as archive:
         for filepath in origin:
-            archive.write(filepath, arcname=filepath.split('\\')[-1])
-            logging.info("Sending '{}'".format(filepath.split('\\')[-1]))
-        print('\n')
+            archive.write(filepath, arcname=os.path.basename(filepath))
+            logging.info("Sending '{}'".format(os.path.basename(filepath)))
+
+        logging.info("Files added to the zip archive: {}".format(origin))
 
 
 def unpack(origin, destination):
