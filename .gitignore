@@ -1,12 +1,14 @@
 # Default ignored files
 /shelf/
 /workspace.xml
-docs/config.ini
+/docs/config.ini
+/venv
+/.idea
 
-communications/server/*
+/communications/server/*
 !communications/server/info.md
 
-communications/client/*
+/communications/client/*
 !communications/client/info.md
 
 *.pyc
