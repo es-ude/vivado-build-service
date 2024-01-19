@@ -1,4 +1,3 @@
-from src.filehandler import create_file
 from docs.config import Config
 
 import subprocess
@@ -45,18 +44,30 @@ def execute(task):
     bash_arguments = [client_id, os.path.abspath(config['tcl script']), os.path.abspath(task), os.path.abspath(result_dir), os.path.abspath(config['constraints'])]
 
     logging.info("Handling task for {}: Task nr. {} \n".format(client_id, task_id))
+
+    delete_report_lines_in_dir(os.path.abspath(task))
     
-    subprocess.run(['./bash/local_autobuild_binfile_vivado2021.1.sh'] + bash_arguments)
+    out = subprocess.run([os.path.abspath('./bash/local_autobuild_binfile_vivado2021.1.sh')] + bash_arguments, capture_output=True, text=True)
+    
+    if out.returncode !=0:
+        logging.error(f"Error executing autobuild script: {out.stderr}")
+    else:
+        print(out.stdout)
 
     # Implement:
     # Insert data in DB
-
-    create_file('completed.txt', result_dir)
 
     logging.info("Task done for {}: Task nr. {} \n".format(client_id, task_id))
 
 
 user_queue = UserQueue()
+
+def delete_report_lines_in_dir(dir: str):
+    for (root, dirs, files) in os.walk(dir, topdown=True):
+        for file in files:
+            file_path = os.path.join(root, file)
+            subprocess.run(["sed", '-i', '/report/d', os.path.abspath(file_path)])
+
 
 
 def worker():
