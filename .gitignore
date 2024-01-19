@@ -2,9 +2,18 @@
 /shelf/
 /workspace.xml
 docs/config.ini
+
+communications/server/*
+!communications/server/info.md
+
+communications/client/*
+!communications/client/info.md
+
 *.pyc
+
 # Editor-based HTTP Client requests
 /httpRequests/
+
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
