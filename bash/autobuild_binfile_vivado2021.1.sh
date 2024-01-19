@@ -1,26 +1,40 @@
 #!/bin/bash
-# $1 usr_name for server
-# $2 ip_addr for server
-# $3 is upload folder from your pc in elasticai.creator/build folder
-# $4 is download folder to your device
+# $1 usr_name
+# $2 filepath to tcl script 
+# $3 task build folder
+# $4 output folder
+# $5 filepath to constraints
 
 # Clear auto_build folder
-ssh $1@$2 "rm -rf /home/$1/.autobuild/*;exit;"
+rm -rf /home/"$1"/.autobuild/*
 
-# Copy build folder from your device to server
-scp -r $3 $1@$2:/home/$1/.autobuild/input_srcs
+# Make directories for Vivado
+mkdir /home/"$1"/.autobuild/input_srcs
+mkdir /home/"$1"/.autobuild/input_srcs/srcs
+mkdir /home/"$1"/.autobuild/input_srcs/constraints
+mkdir /home/"$1"/.autobuild/vivado_project
 
-# Let vivado run
-ssh $1@$2 "export XILINXD_LICENSE_FILE=/opt/flexlm/Xilinx.lic&&/tools/Xilinx/Vivado/2021.1/bin/vivado -mode tcl -source /home/$1/.autobuild_script/create_project_full_run.tcl;exit;"
+# Copy constraints into auto_build folder
+cp "$5" /home/"$1"/.autobuild/input_srcs/constraints
+
+# Copy build folder
+cp -r "$3" /home/"$1"/.autobuild/input_srcs/srcs
+
+# Let Vivado run
+export XILINXD_LICENSE_FILE=/opt/flexlm/Xilinx.lic
+/tools/Xilinx/Vivado/2021.1/bin/vivado -mode tcl -source "$2" >> "$3/run.log" 2>&1
 
 # Copy *bin file to output folder
-ssh $1@$2 "mkdir /home/$1/.autobuild/output; cp /home/$1/.autobuild/vivado_project/project_1.runs/impl_1/*.bin /home/$1/.autobuild/output/;exit;"
+mkdir /home/"$1"/.autobuild/output
+cp /home/"$1"/.autobuild/vivado_project/project_1.runs/impl_1/*.bin /home/"$1"/.autobuild/output/
 
 # Copy script in folder
-ssh $1@$2 "mkdir /home/$1/.autobuild/tcl_script; cp /home/$1/.autobuild_script/create_project_full_run.tcl /home/$1/.autobuild/tcl_script/;exit;"
+mkdir /home/"$1"/.autobuild/tcl_script
+cp /home/"$1"/.autobuild_script/create_project_full_run.tcl /home/"$1"/.autobuild/tcl_script/
 
-# Copy folders back to your machine
-scp -r $1@$2:/home/$1/.autobuild/ $4
+# Copy output folder to download folder
+mkdir "$4"
+cp -r /home/"$1"/.autobuild/output/* "$4"
 
 # Clear auto_build folder
-ssh $1@$2 "rm -rf /home/$1/.autobuild/*;exit;"
+rm -rf /home/"$1"/.autobuild/*

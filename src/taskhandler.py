@@ -47,7 +47,7 @@ def execute(task):
 
     delete_report_lines_in_dir(os.path.abspath(task))
     
-    out = subprocess.run([os.path.abspath('./bash/local_autobuild_binfile_vivado2021.1.sh')] + bash_arguments, capture_output=True, text=True)
+    out = subprocess.run([os.path.abspath('./bash/autobuild_binfile_vivado2021.1.sh')] + bash_arguments, capture_output=True, text=True)
     
     if out.returncode !=0:
         logging.error(f"Error executing autobuild script: {out.stderr}")
@@ -67,7 +67,6 @@ def delete_report_lines_in_dir(dir: str):
         for file in files:
             file_path = os.path.join(root, file)
             subprocess.run(["sed", '-i', '/report/d', os.path.abspath(file_path)])
-
 
 
 def worker():
