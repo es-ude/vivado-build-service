@@ -18,7 +18,7 @@ try:
     directories = sys.argv[2:]
 except:  # Debug Mode
     reset()
-    username = 'dominik'
+    username = config['debug user']
     directories = ['../build_dir/srcs']
 
 request, task_dir = prepare_request(directories, username)

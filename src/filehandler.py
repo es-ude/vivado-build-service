@@ -2,10 +2,8 @@ from docs.config import Config
 
 from zipfile import ZipFile
 import shutil
-import logging
 import os
 
-logging.getLogger().setLevel(logging.INFO)
 
 config = Config().get()
 
@@ -99,9 +97,6 @@ def pack(origin, destination):
     with ZipFile(destination, 'w') as archive:
         for filepath in origin:
             archive.write(filepath, arcname=os.path.basename(filepath))
-            logging.info("Sending '{}'".format(os.path.basename(filepath)))
-
-        logging.info("Files added to the zip archive: {}".format(origin))
 
 
 def unpack(origin, destination):
@@ -109,7 +104,6 @@ def unpack(origin, destination):
     with ZipFile(origin, 'r') as archive:
         for file in archive.filelist:
             archive.extract(file, destination)
-            logging.info("Added '{}'".format(file.filename))
         print('\n')
 
 
