@@ -12,6 +12,7 @@ config = Config().get()
 send_dir = config['send']
 receive_dir = config['receive']
 filename = config['request']
+bash_script = config['bash script']
 
 send_file = '/'.join([send_dir, filename])
 
@@ -142,3 +143,10 @@ def create_file(file, directory):
     with open(filepath, 'a'):
         pass
          
+
+def dos2unix():
+    with open(bash_script + 'unix.sh', "w") as fout: 
+        with open(bash_script + 'dos.sh', "r") as fin:
+            for line in fin:
+                line = line.replace('\r\n', '\n')
+                fout.write(line)

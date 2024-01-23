@@ -38,10 +38,11 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         user_queue.enqueue_task(task=task_directory)
 
         result_directory = task_directory + '/result'
+        os.mkdir(result_directory)
 
         while True:
             try:
-                for fname in os.listdir('.'):
+                for fname in os.listdir(result_directory):
                     if fname.endswith('.bin'):
                         raise FileExists
             except FileExists:

@@ -41,13 +41,14 @@ def execute(task):
     client_id = task.split('/')[-2]
     task_id = task.split('/')[-1]
     result_dir = task + '/result'
+
     bash_arguments = [client_id, os.path.abspath(config['tcl script']), os.path.abspath(task), os.path.abspath(result_dir), os.path.abspath(config['constraints'])]
 
     logging.info("Handling task for {}: Task nr. {} \n".format(client_id, task_id))
 
     delete_report_lines_in_dir(os.path.abspath(task))
     
-    out = subprocess.run([os.path.abspath('./bash/autobuild_binfile_vivado2021.1.sh')] + bash_arguments, capture_output=True, text=True)
+    out = subprocess.run([os.path.abspath(config['bash script'] + 'unix.sh')] + bash_arguments, capture_output=True, text=True)
     
     if out.returncode !=0:
         logging.error(f"Error executing autobuild script: {out.stderr}")
