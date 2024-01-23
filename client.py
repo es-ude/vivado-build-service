@@ -56,7 +56,6 @@ def create_socket():
             outputs.remove(s)
 
         for s in readable:
-            logging.info("reading...")
             chunk = s.recv(chunk_size)
             if not chunk:
                 logging.info(f'closing...\n')
@@ -66,7 +65,6 @@ def create_socket():
                 break
 
             response += chunk
-            i += 1
             break
 
         for s in exceptional:
