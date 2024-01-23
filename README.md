@@ -20,6 +20,14 @@ Run the client with the desired username and build directory:
 
 Modify the server configurations in docs/config.py as needed.
 
+Ensure the required Python dependencies are installed by running:
+
+    pip install -r requirements.txt
+
+Setup the environment by running:
+
+    python setup.py
+
 Run the server using:
 
     python server.py
