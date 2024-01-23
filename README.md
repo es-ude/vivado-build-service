@@ -6,6 +6,8 @@ This tool is designed to automate Vivado simulations by enabling clients to subm
 
 # Client-side Setup:
 
+Modify the connection configurations in docs/config.py as needed.
+
 Ensure the required Python dependencies are installed by running:
 
     pip install -r requirements.txt
@@ -19,6 +21,14 @@ Run the client with the desired username and build directory:
 # Server-side Setup:
 
 Modify the server configurations in docs/config.py as needed.
+
+Ensure the required Python dependencies are installed by running:
+
+    pip install -r requirements.txt
+
+Setup the environment by running:
+
+    python setup.py
 
 Run the server using:
 
