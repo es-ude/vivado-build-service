@@ -34,14 +34,17 @@ def create_socket():
     ret = s.connect_ex((HOST, PORT))
 
     if ret != 0:
-        logging.info('failed to connect!')
+        logging.info('failed to connect!\n')
         return
     
-    logging.info('connected!')
+    logging.info('connected!\n')
     s.setblocking(False)
 
     inputs, outputs = [s], [s]
     response = b''
+
+    i = 0
+    loading = "|/-\\"
 
     while inputs:
         readable, writable, exceptional = select.select(inputs, outputs, inputs, 0.5)
@@ -49,19 +52,22 @@ def create_socket():
         for s in writable:
             logging.info('sending...')
             s.send(data)          
-            logging.info('sent')
+            logging.info('sent\n')
             outputs.remove(s)
 
         for s in readable:
-            logging.info(f'reading...')
+            sys.stdout.write("\rreading... " + loading[i % len(loading)])
+            sys.stdout.flush()
             chunk = s.recv(chunk_size)
             if not chunk:
-                logging.info(f'closing...')
+                logging.info(f'\nclosing...\n')
                 inputs.remove(s)
                 s.close()
+                i = -1
                 break
 
             response += chunk
+            i += 1
             break
 
         for s in exceptional:
@@ -69,6 +75,13 @@ def create_socket():
             inputs.remove(s)
             outputs.remove(s)
             break
+        
+        if i == -1:
+            break
+
+        sys.stdout.write("\rwaiting... " + loading[i % len(loading)])
+        sys.stdout.flush()
+        i += 1
     
     process_response(response, task_dir)
 

@@ -100,11 +100,10 @@ def pack(origin, destination):
 
 
 def unpack(origin, destination):
-    print(origin)
+    print("\n Files located under '{}'".format(os.path.dirname(destination)))
     with ZipFile(origin, 'r') as archive:
         for file in archive.filelist:
             archive.extract(file, destination)
-        print('\n')
 
 
 def clear(directory):

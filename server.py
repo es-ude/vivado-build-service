@@ -6,6 +6,7 @@ from docs.config import Config
 import socketserver
 import threading
 import logging
+import shutil
 import os
 
 logging.getLogger().setLevel(logging.INFO)
@@ -32,13 +33,13 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                 data = stream
  
         data = remove_delimiter(data)
-        logging.info("Receiving data from '{}'.".format(client_address))
+        logging.info("Receiving data from '{}' ({}).".format(client_address, self.client_address))
 
         task_directory = process_request(data, client_address)
-        user_queue.enqueue_task(task=task_directory)
-
         result_directory = task_directory + '/result'
         os.mkdir(result_directory)
+
+        user_queue.enqueue_task(task=task_directory)
 
         while True:
             try:
@@ -55,6 +56,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
             self.request.sendall(chunk)
 
         self.request.close()
+        shutil.rmtree(task_directory)
 
 
 if __name__ == '__main__':
