@@ -2,7 +2,7 @@
 # $1 usr_name
 # $2 filepath to tcl script 
 # $3 task build folder
-# $ result output folder
+# $4 result output folder
 # $5 filepath to constraints
 
 # Clear auto_build folder
@@ -24,7 +24,7 @@ cp -r "$3" /home/"$1"/.autobuild/input_srcs/srcs
 
 # Let Vivado run
 export XILINXD_LICENSE_FILE=/opt/flexlm/Xilinx.lic
-/tools/Xilinx/Vivado/2021.1/bin/vivado -mode tcl -source "$2" >> "$3/run.log" 2>&1
+/tools/Xilinx/Vivado/2021.1/bin/vivado -mode tcl -source "$2" >> "$4/run.log" 2>&1
 
 # Copy *bin file to output folder
 cp /home/"$1"/.autobuild/vivado_project/project_1.runs/impl_1/*.bin /home/"$1"/.autobuild/output/

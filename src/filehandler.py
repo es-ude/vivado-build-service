@@ -59,15 +59,19 @@ def prepare_response(result_directory):
 
 def make_personal_dir(user, directory):
     client_dirs = os.listdir(directory)
-    client_dir = '/'.join([directory, user])
+    client_dir = os.path.join(directory, user)
 
     if user not in client_dirs:
         os.mkdir(client_dir)
         queue_priority = 1
-    else:        
-        queue_priority = max([int(_dir) for _dir in os.listdir(client_dir)]) + 1
+    else:
+        user_dir_contents = os.listdir(client_dir)
+        if not user_dir_contents:
+            queue_priority = 1
+        else:
+            queue_priority = max([int(_dir) for _dir in user_dir_contents]) + 1
     
-    task_dir = '/'.join([client_dir, str(queue_priority)]) 
+    task_dir = os.path.join(client_dir, str(queue_priority)) 
     os.mkdir(task_dir)
 
     return task_dir

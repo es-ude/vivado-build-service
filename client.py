@@ -12,6 +12,7 @@ config = Config().get()
 
 chunk_size = config['chunk size']
 delimiter = config['delimiter'].encode()
+HOST, PORT = config['host'], config['port']
 
 try:
     username = sys.argv[1]
@@ -23,7 +24,6 @@ except:  # Debug Mode
 
 request, task_dir = prepare_request(directories, username)
 
-HOST, PORT = config['host'], config['port']
 data = delimiter.join([username.encode(), request]) + delimiter
 
 
@@ -52,15 +52,14 @@ def create_socket():
         for s in writable:
             logging.info('sending...')
             s.send(data)          
-            logging.info('sent\n')
+            logging.info('sent!\n')
             outputs.remove(s)
 
         for s in readable:
-            sys.stdout.write("\rreading... " + loading[i % len(loading)])
-            sys.stdout.flush()
+            logging.info("reading...")
             chunk = s.recv(chunk_size)
             if not chunk:
-                logging.info(f'\nclosing...\n')
+                logging.info(f'closing...\n')
                 inputs.remove(s)
                 s.close()
                 i = -1
@@ -79,7 +78,13 @@ def create_socket():
         if i == -1:
             break
 
-        sys.stdout.write("\rwaiting... " + loading[i % len(loading)])
+        time_in_seconds = i // 2
+        sys.stdout.write("\rwaiting... {} (Time: {}:{}{})".format(
+            loading[i % len(loading)],
+            time_in_seconds // 60,
+            "0" if time_in_seconds % 60 < 10 else "",
+            time_in_seconds % 60
+            ))
         sys.stdout.flush()
         i += 1
     

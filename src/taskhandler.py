@@ -8,6 +8,10 @@ import os
 logging.getLogger().setLevel(logging.INFO)
 
 config = Config().get()
+tcl_script = os.path.abspath(config['tcl script'])
+constraints = os.path.abspath(config['constraints'])
+bash_script = os.path.abspath(config['bash script'] + 'unix.sh')
+
 task_is_finished = False
 
 
@@ -40,20 +44,18 @@ class UserQueue:
 def execute(task):
     client_id = task.split('/')[-2]
     task_id = task.split('/')[-1]
-    result_dir = task + '/result'
-
-    bash_arguments = [client_id, os.path.abspath(config['tcl script']), os.path.abspath(task), os.path.abspath(result_dir), os.path.abspath(config['constraints'])]
+    result_dir = os.path.abspath(task + '/result')
+    task_path = os.path.abspath(task)
 
     logging.info("Handling task for {}: Task nr. {} \n".format(client_id, task_id))
 
     delete_report_lines_in_dir(os.path.abspath(task))
-    
-    out = subprocess.run([os.path.abspath(config['bash script'] + 'unix.sh')] + bash_arguments, capture_output=True, text=True)
+
+    bash_arguments = [client_id, tcl_script, task_path, result_dir, constraints]
+    out = subprocess.run([bash_script] + bash_arguments, capture_output=True, text=True)
     
     if out.returncode !=0:
         logging.error(f"Error executing autobuild script: {out.stderr}")
-    else:
-        print(out.stdout)
 
     # Implement:
     # Insert data in DB
