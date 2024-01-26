@@ -12,7 +12,7 @@ receive_dir = config['receive']
 request_file = config['request']
 bash_script = config['bash script']
 
-send_file = '/'.join([send_dir, request_file])
+send_file = os.path.join([send_dir, request_file])
 
 
 def prepare_request(directories, user):  # Client
