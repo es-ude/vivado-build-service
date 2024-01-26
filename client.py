@@ -23,9 +23,7 @@ except:  # Debug Mode
     directories = ['../build_dir/srcs']
 
 request, task_dir = prepare_request(directories, username)
-
 data = delimiter.join([username.encode(), request]) + delimiter
-
 
 def create_socket():
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -40,11 +38,10 @@ def create_socket():
     logging.info('connected!\n')
     s.setblocking(False)
 
-    inputs, outputs = [s], [s]
-    response = b''
 
     i = 0
-    loading = "|/-\\"
+    inputs, outputs = [s], [s]
+    response = b''
 
     while inputs:
         readable, writable, exceptional = select.select(inputs, outputs, inputs, 0.5)
@@ -71,22 +68,25 @@ def create_socket():
             logging.info(f'error')
             inputs.remove(s)
             outputs.remove(s)
+            i = -1
             break
         
-        if i == -1:
-            break
+        loading(i)
 
-        time_in_seconds = i // 2
-        sys.stdout.write("\rwaiting... {} (Time: {}:{}{})".format(
-            loading[i % len(loading)],
-            time_in_seconds // 60,
-            "0" if time_in_seconds % 60 < 10 else "",
-            time_in_seconds % 60
-            ))
-        sys.stdout.flush()
-        i += 1
-    
     process_response(response, task_dir)
+
+def loading(i):
+    if i == -1: return    
+    loading = "|/-\\"
+    time_in_seconds = i // 2
+    sys.stdout.write("\rwaiting... {} (Time: {}:{}{})".format(
+        loading[i % len(loading)],
+        time_in_seconds // 60,
+        "0" if time_in_seconds % 60 < 10 else "",
+        time_in_seconds % 60
+        ))
+    sys.stdout.flush()
+    i += 1
 
 
 def main():

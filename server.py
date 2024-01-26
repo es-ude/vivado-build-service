@@ -12,6 +12,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 config = Config().get()
 chunk_size = config['chunk size']
+HOST, PORT = config['host'], config['port']
 
 class FileExists(Exception): pass
 
@@ -58,8 +59,6 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
 
 if __name__ == '__main__':
-    HOST, PORT = config['host'], config['port']
-
     with socketserver.TCPServer((HOST, PORT), ThreadedTCPHandler) as server:
         server_thread = threading.Thread(target=server.serve_forever)
         server_thread.daemon = True

@@ -9,10 +9,10 @@ config = Config().get()
 
 send_dir = config['send']
 receive_dir = config['receive']
-filename = config['request']
+request_file = config['request']
 bash_script = config['bash script']
 
-send_file = '/'.join([send_dir, filename])
+send_file = '/'.join([send_dir, request_file])
 
 
 def prepare_request(directories, user):  # Client
@@ -22,7 +22,7 @@ def prepare_request(directories, user):  # Client
         file_list += get_filepaths(directory)
     
     task_dir = make_personal_dir(user, send_dir)
-    filepath = '/'.join([task_dir, filename])
+    filepath = '/'.join([task_dir, request_file])
     pack(file_list, filepath)
 
     return serialize(filepath), task_dir
@@ -40,7 +40,7 @@ def process_response(data, task_dir):
 
 def process_request(data, user):  # Server
         task_dir = make_personal_dir(user, receive_dir)       
-        filepath = '/'.join([task_dir, filename])
+        filepath = '/'.join([task_dir, request_file])
         
         deserialize(data, filepath)
         unpack(filepath, task_dir)
@@ -104,7 +104,7 @@ def pack(origin, destination):
 
 
 def unpack(origin, destination):
-    print("\n Files located under '{}'".format(os.path.dirname(destination)))
+    print("\n Files located under '{}'".format(os.path.abspath(destination)))
     with ZipFile(origin, 'r') as archive:
         for file in archive.filelist:
             archive.extract(file, destination)
