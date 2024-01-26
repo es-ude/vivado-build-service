@@ -12,7 +12,7 @@ receive_dir = config['receive']
 request_file = config['request']
 bash_script = config['bash script']
 
-send_file = os.path.join([send_dir, request_file])
+send_file = os.path.join(send_dir, request_file)
 
 
 def prepare_request(directories, user):  # Client
@@ -142,16 +142,8 @@ def create_file(file, directory):
          
 
 def dos2unix(origin, destination):
-    with open(destination) as fout:
-        with open(origin) as fin:
-            for line in fin:
-                line = line.replace('\r\n', '\n')
-                fout.write(line)
-
-
-def old_dos2unix():
-    with open(bash_script + 'unix.sh', "w") as fout: 
-        with open(bash_script + 'dos.sh', "r") as fin:
+    with open(destination, "w") as fout:
+        with open(origin, "r") as fin:
             for line in fin:
                 line = line.replace('\r\n', '\n')
                 fout.write(line)
