@@ -141,7 +141,15 @@ def create_file(file, directory):
         pass
          
 
-def dos2unix():
+def dos2unix(origin, destination):
+    with open(destination) as fout:
+        with open(origin) as fin:
+            for line in fin:
+                line = line.replace('\r\n', '\n')
+                fout.write(line)
+
+
+def old_dos2unix():
     with open(bash_script + 'unix.sh', "w") as fout: 
         with open(bash_script + 'dos.sh', "r") as fin:
             for line in fin:
