@@ -14,7 +14,6 @@ bash_script = os.path.abspath(config['bash script'] + 'unix.sh')
 
 task_is_finished = False
 
-
 class UserQueue:
     def __init__(self):
         self.user_queues = {}

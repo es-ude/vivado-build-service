@@ -4,7 +4,6 @@ from zipfile import ZipFile
 import shutil
 import os
 
-
 config = Config().get()
 
 send_dir = config['send']
@@ -13,7 +12,6 @@ request_file = config['request']
 bash_script = config['bash script']
 
 send_file = os.path.join(send_dir, request_file)
-
 
 def prepare_request(directories, user):  # Client
     file_list = []
