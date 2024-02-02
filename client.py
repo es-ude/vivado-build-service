@@ -38,7 +38,6 @@ def create_socket():
     logging.info('connected!\n')
     s.setblocking(False)
 
-
     i = 0
     inputs, outputs = [s], [s]
     response = b''
@@ -55,23 +54,23 @@ def create_socket():
         for s in readable:
             chunk = s.recv(chunk_size)
             if not chunk:
-                logging.info(f'closing...\n')
+                logging.info('\nclosing...\n')
                 inputs.remove(s)
                 s.close()
                 i = -1
                 break
 
             response += chunk
-            break
 
         for s in exceptional:
-            logging.info(f'error')
+            logging.info('\nerror')
             inputs.remove(s)
             outputs.remove(s)
             i = -1
             break
         
         loading(i)
+        i += 1
 
     process_response(response, task_dir)
 
@@ -86,7 +85,6 @@ def loading(i):
         time_in_seconds % 60
         ))
     sys.stdout.flush()
-    i += 1
 
 
 def main():
