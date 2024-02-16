@@ -31,5 +31,6 @@ class Config:
             'DB URL': self.config.get('Database', 'DB URL'),
 
             # Debug
-            'debug user': self.config.get('Debug', 'debug user')
+            'debug user': self.config.get('Debug', 'debug user'),
+            'example build': self.config.get('Debug', 'example build')
         }
