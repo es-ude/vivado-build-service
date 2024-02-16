@@ -6,11 +6,11 @@
 /.idea/
 /.vscode/
 
-/communications/server/*
-!communications/server/info.md
+/tmp/server/*
+!tmp/server/info.md
 
-/communications/client/*
-!communications/client/info.md
+/tmp/client/*
+!tmp/client/info.md
 
 *.pyc
 
