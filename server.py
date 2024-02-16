@@ -17,39 +17,43 @@ HOST, PORT = config['host'], config['port']
 class ThreadedTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         user_queue = self.server.user_queue
-        
-        data = b''
-        client_address = ''
-        
-        while True:
-            chunk = self.request.recv(chunk_size)
-            data += chunk
-
-            if len(chunk) < chunk_size or end_reached(chunk):
-                break
-
-            if not client_address:
-                client_address, stream = split_stream(data)
-                data = stream
- 
-        data = remove_delimiter(data)
-        logging.info("Receiving data from '{}' {}.".format(client_address, self.client_address))
-
+        data, client_address = get_request(self)
         task_directory = process_request(data, client_address)
         result_directory = task_directory + '/result'
         os.mkdir(result_directory)
 
         user_queue.enqueue_task(task=task_directory)
-
         await_task_completion(result_directory + '/output')
-
         response = prepare_response(result_directory)
-
-        for i in range(0, len(response), chunk_size):
-            chunk = response[i:i + chunk_size]
-            self.request.sendall(chunk)
+        send(self, response)
 
         self.request.close()
+
+
+def get_request(tcpHandler):
+    data = b''
+    client_address = ''
+    
+    while True:
+        chunk = tcpHandler.request.recv(chunk_size)
+        data += chunk
+
+        if len(chunk) < chunk_size or end_reached(chunk):
+            break
+
+        if not client_address:
+            client_address, stream = split_stream(data)
+            logging.info("Receiving data from '{}' {}.".format(client_address, tcpHandler.client_address))
+            data = stream
+
+    data = remove_delimiter(data)
+    return data, client_address
+
+
+def send(tcpHandler, response):
+    for i in range(0, len(response), chunk_size):
+        chunk = response[i:i + chunk_size]
+        tcpHandler.request.sendall(chunk)
 
 
 def await_task_completion(directory):
