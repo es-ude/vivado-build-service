@@ -1,5 +1,5 @@
 #!/bin/bash
-# $1 usr_name
+# $1 Vivado User
 # $2 filepath to tcl script 
 # $3 task build folder
 # $4 result output folder
@@ -33,7 +33,7 @@ cp /home/"$1"/.autobuild/vivado_project/project_1.runs/impl_1/*.bin /home/"$1"/.
 cp /home/"$1"/.autobuild_script/create_project_full_run.tcl /home/"$1"/.autobuild/tcl_script/
 
 # Copy output folder to result folder
-cp -r /home/"$1"/.autobuild/output/* "$4"
+cp -r /home/"$1"/.autobuild/* "$4"
 
 # Clear auto_build folder
 rm -rf /home/"$1"/.autobuild/*
