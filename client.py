@@ -69,12 +69,13 @@ def create_socket():
             i = -1
             break
         
-        loading(i)
-        i += 1
+        print_loading_animation(i)
+        if i != -1: i += 1
 
     process_response(response, task_dir)
 
-def loading(i):
+
+def print_loading_animation(i):
     if i == -1: return    
     loading = "|/-\\"
     time_in_seconds = i // 2
