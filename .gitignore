@@ -4,6 +4,7 @@
 /docs/config.ini
 /venv/
 /.idea/
+/.vscode/
 
 /communications/server/*
 !communications/server/info.md
