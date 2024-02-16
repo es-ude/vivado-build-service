@@ -1,6 +1,7 @@
 from docs.config import Config
 
 from zipfile import ZipFile
+import zipfile
 import shutil
 import os
 
@@ -80,7 +81,8 @@ def get_filepaths(directory):
 
     for root, dirs, files in os.walk(directory):
         for file in files:
-            file_list.append(os.path.join(root, file))
+            filepath = os.path.join(root, file)
+            file_list.append(filepath)
 
     return file_list
 
@@ -96,9 +98,10 @@ def deserialize(stream, destination):
 
 
 def pack(origin, destination):
-    with ZipFile(destination, 'w') as archive:
+    with ZipFile(destination, 'w', zipfile.ZIP_DEFLATED) as archive:
         for filepath in origin:
-            archive.write(filepath, arcname=os.path.basename(filepath))
+            relative_path = os.path.relpath(filepath, os.path.dirname(destination))
+            archive.write(filepath, arcname=relative_path)
 
 
 def unpack(origin, destination):
