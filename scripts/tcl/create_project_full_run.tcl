@@ -16,7 +16,7 @@ update_compile_order -fileset sources_1
 
 # STEP#2: run synthesis
 if {[catch {
-    launch_runs synth_1 -jobs 6
+    launch_runs synth_1 -jobs 12
     wait_on_run synth_1
 } errorMsg]} {
     exit_on_error $errorMsg
@@ -25,7 +25,7 @@ if {[catch {
 # STEP#3: run implementation
 if {[catch {
     set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
-    launch_runs impl_1 -to_step write_bitstream -jobs 6
+    launch_runs impl_1 -to_step write_bitstream -jobs 12
     wait_on_run impl_1
 } errorMsg]} {
     exit_on_error $errorMsg
