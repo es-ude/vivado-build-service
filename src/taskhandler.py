@@ -1,7 +1,6 @@
 from docs.config import Config
 
 import subprocess
-import threading
 import logging
 import os
 
@@ -11,6 +10,7 @@ config = Config().get()
 tcl_script = os.path.abspath(config['tcl script'])
 constraints = os.path.abspath(config['constraints'])
 bash_script = os.path.abspath(config['bash script'] + 'unix.sh')
+vnc_user = config['username']
 
 task_is_finished = False
 
@@ -50,7 +50,7 @@ def execute(task):
 
     delete_report_lines_in_dir(os.path.abspath(task))
 
-    bash_arguments = [client_id, tcl_script, task_path, result_dir, constraints]
+    bash_arguments = [vnc_user, tcl_script, task_path, result_dir, constraints]
     out = subprocess.run([bash_script] + bash_arguments, capture_output=True, text=True)
     
     if out.returncode !=0:
