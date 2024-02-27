@@ -75,7 +75,7 @@ def Task_worker(user_queue):
         execute(task)
 
 
-if __name__ == '__main__':
+def main(HOST, PORT):
     user_queue = UserQueue()
     taskhandler_thread = threading.Thread(target=Task_worker, args=(user_queue, ))
     taskhandler_thread.daemon = True
@@ -87,3 +87,7 @@ if __name__ == '__main__':
         server_thread.daemon = True
         server_thread.start()
         server_thread.join()
+
+
+if __name__ == '__main__':
+    main(HOST, PORT)

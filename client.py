@@ -25,7 +25,7 @@ except:  # Debug Mode
 request, task_dir = prepare_request(directories, username)
 data = delimiter.join([username.encode(), request]) + delimiter
 
-def create_socket():
+def create_socket(HOST, PORT):
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
     logging.info('connecting...')
@@ -89,7 +89,7 @@ def print_loading_animation(i):
 
 
 def main():
-    create_socket()
+    create_socket(HOST, PORT)
 
 
 if __name__ == '__main__':
