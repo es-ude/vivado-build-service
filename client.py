@@ -1,6 +1,7 @@
 from src.filehandler import prepare_request, process_response, reset
 from docs.config import Config
 
+import subprocess
 import logging
 import socket
 import select
@@ -75,6 +76,10 @@ def create_socket(HOST, PORT):
     process_response(response, task_dir)
 
 
+def forward_port(host, port, username, ip):
+    subprocess.Popen("ssh -Y -L {}:{}:{} {}@{}".format(port, host, port, username, ip))
+
+
 def print_loading_animation(i):
     if i == -1: return    
     loading = "|/-\\"
@@ -89,6 +94,9 @@ def print_loading_animation(i):
 
 
 def main():
+    username = config['username']
+    ip = config['ip address']
+    forward_port(HOST, PORT, username, ip)
     create_socket(HOST, PORT)
 
 
