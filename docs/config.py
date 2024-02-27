@@ -32,5 +32,12 @@ class Config:
 
             # Debug
             'debug user': self.config.get('Debug', 'debug user'),
-            'example build': self.config.get('Debug', 'example build')
+            'example build': self.config.get('Debug', 'example build'),
+
+            # Tests
+            'test host': self.config.get('Tests', 'test host'),
+            'test port': self.config.get('Tests', 'test port'),
+            'test send': self.config.get('Tests', 'test send'),
+            'test receive': self.config.get('Tests', 'test receive'),
+            'test build': self.config.get('Tests', 'test build')
         }
