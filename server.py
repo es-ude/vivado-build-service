@@ -79,8 +79,8 @@ def main(HOST, PORT):
     user_queue = UserQueue()
     taskhandler_thread = threading.Thread(target=Task_worker, args=(user_queue, ))
     taskhandler_thread.daemon = True
-    taskhandler_thread.start()    
-
+    taskhandler_thread.start()
+    
     with socketserver.TCPServer((HOST, PORT), ThreadedTCPHandler) as server:
         server.user_queue = user_queue
         server_thread = threading.Thread(target=server.serve_forever)
