@@ -29,7 +29,7 @@ class TestServerClientCommunication(TestCase):
             mock_socket.return_value.__enter__.return_value = mock_socket
             mock_socket.recv.side_effect = [b'example_response']
 
-            client.create_socket()
+            client.setup()
 
             mock_socket.send.assert_called_once_with(b'example_data')
 

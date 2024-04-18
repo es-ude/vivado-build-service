@@ -35,9 +35,6 @@ class Config:
             'example build': self.config.get('Debug', 'example build'),
 
             # Tests
-            'test host': self.config.get('Tests', 'test host'),
-            'test port': self.config.get('Tests', 'test port'),
-            'test send': self.config.get('Tests', 'test send'),
-            'test receive': self.config.get('Tests', 'test receive'),
-            'test build': self.config.get('Tests', 'test build')
+            'test bash script': self.config.get('Tests', 'test bash script'),
+            'test packet': self.config.get('Tests', 'test packet')
         }
