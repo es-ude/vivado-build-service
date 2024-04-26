@@ -1,4 +1,4 @@
-from docs.config import Config
+from . import config
 
 import subprocess
 import logging
@@ -8,7 +8,6 @@ import os
 logging.getLogger().setLevel(logging.INFO)
 
 global bash_script
-config = Config().get()
 tcl_script = os.path.abspath(config['tcl script'])
 constraints = os.path.abspath(config['constraints'])
 bash_script = [os.path.abspath(config['bash script'] + 'unix.sh')]

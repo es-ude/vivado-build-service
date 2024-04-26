@@ -1,5 +1,5 @@
 from src.filehandler import prepare_request, process_response, reset
-from docs.config import Config
+from src import config
 from contextlib import closing
 
 import subprocess
@@ -9,9 +9,6 @@ import select
 import sys
 
 logging.getLogger().setLevel(logging.INFO)
-
-global directories
-config = Config().get()
 
 chunk_size = config['chunk size']
 delimiter = config['delimiter'].encode()
@@ -26,6 +23,9 @@ except:  # Debug Mode
     directories = ['../build_dir/srcs']
 
 def setup(HOST, PORT, testing=False):
+    global directories
+    global username
+
     if testing:
         username = 'testing'
         directories = [config['test packet']]

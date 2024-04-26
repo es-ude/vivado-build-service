@@ -1,6 +1,4 @@
-from docs.config import Config
-
-config = Config().get()
+from . import config
 delimiter = config['delimiter'].encode()
 
 

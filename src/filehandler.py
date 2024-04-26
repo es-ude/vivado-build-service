@@ -1,11 +1,8 @@
-from docs.config import Config
-
+from . import config
 from zipfile import ZipFile
 import zipfile
 import shutil
 import os
-
-config = Config().get()
 
 send_dir = config['send']
 receive_dir = config['receive']
@@ -38,7 +35,7 @@ def process_response(data, task_dir):
 
 
 def process_request(data, user):  # Server
-        task_dir = make_personal_dir(user, receive_dir)       
+        task_dir = make_personal_dir(user, receive_dir)
         filepath = '/'.join([task_dir, request_file])
         
         deserialize(data, filepath)
@@ -109,6 +106,8 @@ def unpack(origin, destination):
     with ZipFile(origin, 'r') as archive:
         for file in archive.filelist:
             archive.extract(file, destination)
+
+    print("done unzipping")
 
 
 def clear(directory):
