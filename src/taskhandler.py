@@ -53,16 +53,9 @@ def execute(task, event, testing=False):
     task_path = os.path.abspath(task)
 
     if testing:
-        try:    
-            bash_script = [os.path.abspath(config['test bash script'])]
-            print("\nDEBUG: " + task + " " + bash_script[0] + " " + result_dir)
+        bash_script = [os.path.abspath(config['test bash script'])]
 
-        except Exception as e:
-            print(f"ERROR: {e}")
-            return
-
-
-    logging.info("Handling task for {}: Task nr. {} \n".format(client_id, task_id))
+    logging.info("Handling task for {}: Task nr. {}\n".format(client_id, task_id))
 
     delete_report_lines_in_dir(os.path.abspath(task))
 
@@ -76,10 +69,10 @@ def execute(task, event, testing=False):
             out = subprocess.run(bash_script + bash_arguments,
                                  capture_output=True, text=True, check=True)
     except Exception as e:
-        logging.error(f"\nError executing autobuild script: {e}\n{out}\n")
+        logging.error(e)
         return
 
-    # Insert data in DB - This part is not implemented
+    # Insert data in DB - This part is not yet implemented
 
     logging.info("Task done for {}: Task nr. {} \n".format(client_id, task_id))
 
@@ -89,16 +82,14 @@ def delete_report_lines_in_dir(dir: str):
         for file in files:
             file_path = os.path.abspath(os.path.join(root, file))
             try:
-                if os_is_windows:
-                    with open(file_path, 'r+') as f:
-                        lines = f.readlines()
-                        f.seek(0)
-                        for line in lines:
-                            if 'report' not in line:
-                                f.write(line)
-                        f.truncate()
-                else:
-                    subprocess.run(["sed", '-i', '/report/d', file_path])
+                with open(file_path, 'r+') as f:
+                    lines = f.readlines()
+                    f.seek(0)
+                    for line in lines:
+                        if 'report' not in line:
+                            f.write(line)
+                    f.truncate()
+
             except Exception as e:
                 logging.error(f"\nError deleting report lines: {e}")
                 continue
