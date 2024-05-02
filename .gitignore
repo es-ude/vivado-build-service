@@ -18,6 +18,8 @@
 /tests/testing-environment/tmp/client/*
 !tests/testing-environment/tmp/client/info.md
 
+/tests/test_packet/*
+
 *.pyc
 
 # Editor-based HTTP Client requests
