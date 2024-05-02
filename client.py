@@ -1,5 +1,6 @@
 from src.filehandler import prepare_request, process_response, reset
-from docs.config import Config
+from src import config
+from contextlib import closing
 
 import subprocess
 import logging
@@ -8,8 +9,6 @@ import select
 import sys
 
 logging.getLogger().setLevel(logging.INFO)
-
-config = Config().get()
 
 chunk_size = config['chunk size']
 delimiter = config['delimiter'].encode()
@@ -23,10 +22,17 @@ except:  # Debug Mode
     username = config['debug user']
     directories = ['../build_dir/srcs']
 
-request, task_dir = prepare_request(directories, username)
-data = delimiter.join([username.encode(), request]) + delimiter
+def setup(HOST, PORT, testing=False):
+    global directories
+    global username
 
-def create_socket(HOST, PORT):
+    if testing:
+        username = 'testing'
+        directories = [config['test packet']]
+
+    request, task_dir = prepare_request(directories, username)
+    data = delimiter.join([username.encode(), request]) + delimiter
+
     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
     logging.info('connecting...')
@@ -75,9 +81,15 @@ def create_socket(HOST, PORT):
 
     process_response(response, task_dir)
 
+   
+def check_socket(host, port):
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+        return sock.connect_ex((host, port)) == 0
+
 
 def forward_port(host, port, username, ip):
-    subprocess.Popen("ssh -Y -L {}:{}:{} {}@{}".format(port, host, port, username, ip))
+    if check_socket:
+        subprocess.Popen("ssh -Y -L {}:{}:{} {}@{}".format(port, host, port, username, ip), creationflags=subprocess.CREATE_NEW_CONSOLE)
 
 
 def print_loading_animation(i):
@@ -97,7 +109,7 @@ def main():
     username = config['username']
     ip = config['ip address']
     forward_port(HOST, PORT, username, ip)
-    create_socket(HOST, PORT)
+    setup(HOST, PORT)
 
 
 if __name__ == '__main__':

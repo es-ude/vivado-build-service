@@ -1,22 +1,26 @@
 from src.filehandler import process_request, prepare_response
 from src.streamutil import split_stream, end_reached, remove_delimiter
 from src.taskhandler import UserQueue, execute
-from docs.config import Config
+from src import config
 
+from concurrent.futures import ThreadPoolExecutor
 import socketserver
 import threading
 import logging
+import time
 import os
 
 logging.getLogger().setLevel(logging.INFO)
+event = threading.Event()
 
-config = Config().get()
+server_is_running = False
 chunk_size = config['chunk size']
 HOST, PORT = config['host'], config['port']
 
 class ThreadedTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         user_queue = self.server.user_queue
+        testing = self.server.testing
         data, client_address = get_request(self)
         task_directory = process_request(data, client_address)
         result_directory = task_directory + '/result'
@@ -26,6 +30,9 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         await_task_completion(result_directory + '/output')
         response = prepare_response(result_directory)
         send(self, response)
+
+        if testing:
+            shutdown(self.server)
 
         self.request.close()
 
@@ -65,29 +72,68 @@ def await_task_completion(directory):
                 return
 
 
-def Task_worker(user_queue):
-    while True:
-        task = user_queue.dequeue_task()
+def Task_worker(user_queue, event, testing=False):
+    with ThreadPoolExecutor(max_workers=12) as executor:
+        while True:
+            if event.is_set():
+                break
 
-        if task is None:
-            continue
+            task = user_queue.dequeue_task()
+            if task is None:
+                continue
 
-        execute(task)
+            executor.submit(execute, task, event, testing)
+    
+
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    pass
 
 
-def main(HOST, PORT):
+def setup_taskhandler(testing=False):
     user_queue = UserQueue()
-    taskhandler_thread = threading.Thread(target=Task_worker, args=(user_queue, ))
+    taskhandler_thread = threading.Thread(target=Task_worker, args=(user_queue, event, testing))
     taskhandler_thread.daemon = True
     taskhandler_thread.start()
-    
-    with socketserver.TCPServer((HOST, PORT), ThreadedTCPHandler) as server:
-        server.user_queue = user_queue
-        server_thread = threading.Thread(target=server.serve_forever)
-        server_thread.daemon = True
-        server_thread.start()
-        server_thread.join()
+    return user_queue
+
+
+def setup_server(user_queue, testing=False):
+    try:
+        global server_is_running
+        
+        with ThreadPoolExecutor(max_workers=12) as executor:
+            with ThreadedTCPServer((HOST, PORT), ThreadedTCPHandler) as server:
+                server.user_queue = user_queue
+                server.testing = testing
+                server_thread = threading.Thread(target=server.serve_forever)
+                server_thread.daemon = True
+                server_thread.start()
+                server_thread.join()
+                
+                if not server_is_running:
+                    server_is_running = True
+                    logging.info("Server is running.")
+                    logging.info("Waiting for connection...")
+
+    except Exception as e:
+        logging.error(f"Server-Side Error: {e}")
+        
+
+def setup(testing=False):
+    user_queue = setup_taskhandler(testing)
+    setup_server(user_queue, testing)
+
+
+def shutdown(server):
+    event.set()
+    server.shutdown()
+    logging.info("Server Shutdown")
+
+
+def main():
+    logging.info("Server starting up...")
+    setup()
 
 
 if __name__ == '__main__':
-    main(HOST, PORT)
+    main()

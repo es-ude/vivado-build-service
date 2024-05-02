@@ -18,6 +18,8 @@
 /tests/testing-environment/tmp/client/*
 !tests/testing-environment/tmp/client/info.md
 
+/tests/test_packet/*
+
 *.pyc
 
 # Editor-based HTTP Client requests
@@ -26,3 +28,6 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+
+# Temporary
+/scripts/tcl/tcl_script.py
