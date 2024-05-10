@@ -38,22 +38,32 @@ class Test(TestCase):
 
 
     def tearDown(self) -> None:
-        reset()
+       # reset()
         return super().tearDown()
 
     def test_files_equal(self):
-        test_packet = os.listdir(config['test packet'])
-        directory_server = 'tmp/server/testing/1/tests/test_packet'
-        directory_test_packet = 'tests/test_packet'
+        directory_server = 'tmp/server/testing/1/'
+        directory_test_packet = config['test packet']
 
         try:
-            index = 0
-            for file in os.listdir(directory_server):
-                abspath = os.path.abspath(os.path.join(directory_server, file))
-                test_packet_abspath = os.path.abspath(os.path.join(directory_test_packet, test_packet[index]))
+            self.assertTrue(compare_directories(directory_test_packet, directory_server))
 
-                self.assertTrue(filecmp.cmp(abspath, test_packet_abspath, shallow=False))
-                logging.info(f"File {index + 1}: Success")
-                index += 1
         except Exception as e:
-            self.fail(f"File {index + 1}: Failure\nError: {e}")
+            self.fail(e)
+
+
+def compare_directories(dir1, dir2):
+    dirs_cmp = filecmp.dircmp(dir1, dir2, ignore=['result'])
+    if len(dirs_cmp.left_only)>0 or len(dirs_cmp.right_only)>0 or \
+        len(dirs_cmp.funny_files)>0:
+        return False
+    (_, mismatch, errors) =  filecmp.cmpfiles(
+        dir1, dir2, dirs_cmp.common_files, shallow=False)
+    if len(mismatch)>0 or len(errors)>0:
+        return False
+    for common_dir in dirs_cmp.common_dirs:
+        new_dir1 = os.path.join(dir1, common_dir)
+        new_dir2 = os.path.join(dir2, common_dir)
+        if not compare_directories(new_dir1, new_dir2):
+            return False
+    return True
