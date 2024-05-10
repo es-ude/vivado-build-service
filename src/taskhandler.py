@@ -44,6 +44,8 @@ class UserQueue:
 
 
 def execute(task, event, testing=False):
+    global bash_script
+
     if event.is_set():
         return
     

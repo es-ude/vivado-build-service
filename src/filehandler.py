@@ -8,6 +8,8 @@ send_dir = config['send']
 receive_dir = config['receive']
 request_file = config['request']
 bash_script = config['bash script']
+test_packet = config['test packet']
+
 
 send_file = os.path.join(send_dir, request_file)
 
@@ -35,6 +37,7 @@ def process_response(data, task_dir):
 
 
 def process_request(data, user):  # Server
+        print("DEBUG " + user)
         task_dir = make_personal_dir(user, receive_dir)
         filepath = '/'.join([task_dir, request_file])
         
@@ -74,14 +77,12 @@ def make_personal_dir(user, directory):
 
 
 def get_filepaths(directory):
-    file_list = []
-
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            filepath = os.path.join(root, file)
-            file_list.append(filepath)
-
-    return file_list
+  filepaths = []
+  for root, _, files in os.walk(directory):
+    for file in files:
+      filepath = os.path.join(root, file)
+      filepaths.append(filepath)
+  return filepaths
 
 
 def serialize(file):
@@ -97,8 +98,11 @@ def deserialize(stream, destination):
 def pack(origin, destination):
     with ZipFile(destination, 'w', zipfile.ZIP_DEFLATED) as archive:
         for filepath in origin:
-            relative_path = os.path.relpath(filepath, os.path.dirname(destination))
-            archive.write(filepath, arcname=relative_path)
+            if test_packet in filepath:
+                relative_path = os.path.relpath(filepath, os.path.abspath(test_packet))
+            else:
+                relative_path = os.path.relpath(filepath, destination)
+            archive.write(filepath, relative_path)
 
 
 def unpack(origin, destination):

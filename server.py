@@ -45,13 +45,13 @@ def get_request(tcpHandler):
         chunk = tcpHandler.request.recv(chunk_size)
         data += chunk
 
-        if len(chunk) < chunk_size or end_reached(chunk):
-            break
-
         if not client_address:
             client_address, stream = split_stream(data)
             logging.info("Receiving data from '{}' {}.".format(client_address, tcpHandler.client_address))
             data = stream
+
+        if len(chunk) < chunk_size or end_reached(chunk):
+            break    
 
     data = remove_delimiter(data)
     return data, client_address
