@@ -12,4 +12,4 @@ echo "testing.sh Error Log" > error.log
 mkdir -p "$4"/output >> error.log
 
 # Create completed.bin file
-cat > "$4"/output/completed.bin >> error.log
+cat > "$4"/output/completed.bin

@@ -2,15 +2,18 @@ from unittest import TestCase
 import filecmp
 import logging
 import time
+import threading
+
 import os
+os.chdir('../../vivado-test-runner')
 
 from src import config
 from src.filehandler import reset
 import server
 import client
-import threading
 
 logging.getLogger().setLevel(logging.INFO)
+
 
 class Test(TestCase):
     def setUp(self) -> None:
@@ -54,12 +57,12 @@ class Test(TestCase):
 
 def compare_directories(dir1, dir2):
     dirs_cmp = filecmp.dircmp(dir1, dir2, ignore=['result'])
-    if len(dirs_cmp.left_only)>0 or len(dirs_cmp.right_only)>0 or \
-        len(dirs_cmp.funny_files)>0:
+    if len(dirs_cmp.left_only) > 0 or len(dirs_cmp.right_only) > 0 or \
+       len(dirs_cmp.funny_files) > 0:
         return False
-    (_, mismatch, errors) =  filecmp.cmpfiles(
+    (_, mismatch, errors) = filecmp.cmpfiles(
         dir1, dir2, dirs_cmp.common_files, shallow=False)
-    if len(mismatch)>0 or len(errors)>0:
+    if len(mismatch) > 0 or len(errors) > 0:
         return False
     for common_dir in dirs_cmp.common_dirs:
         new_dir1 = os.path.join(dir1, common_dir)

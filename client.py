@@ -22,6 +22,7 @@ except:  # Debug Mode
     username = config['debug user']
     directories = ['../build_dir/srcs']
 
+
 def setup(HOST, PORT, testing=False):
     global directories
     global username
@@ -33,7 +34,7 @@ def setup(HOST, PORT, testing=False):
     request, task_dir = prepare_request(directories, username)
     data = delimiter.join([username.encode(), request]) + delimiter
 
-    s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     logging.info('connecting...')
     ret = s.connect_ex((HOST, PORT))
@@ -41,7 +42,7 @@ def setup(HOST, PORT, testing=False):
     if ret != 0:
         logging.info('failed to connect!\n')
         return
-    
+
     logging.info('connected!\n')
     s.setblocking(False)
 
@@ -54,7 +55,7 @@ def setup(HOST, PORT, testing=False):
 
         for s in writable:
             logging.info('sending...')
-            s.send(data)          
+            s.send(data)
             logging.info('sent!\n')
             outputs.remove(s)
 
@@ -75,13 +76,13 @@ def setup(HOST, PORT, testing=False):
             outputs.remove(s)
             i = -1
             break
-        
+
         print_loading_animation(i)
         if i != -1: i += 1
 
     process_response(response, task_dir)
 
-   
+
 def check_socket(host, port):
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
         return sock.connect_ex((host, port)) == 0
@@ -89,11 +90,12 @@ def check_socket(host, port):
 
 def forward_port(host, port, username, ip):
     if check_socket:
-        subprocess.Popen("ssh -Y -L {}:{}:{} {}@{}".format(port, host, port, username, ip), creationflags=subprocess.CREATE_NEW_CONSOLE)
+        subprocess.Popen("ssh -Y -L {}:{}:{} {}@{}".format(port, host, port, username, ip),
+                         creationflags=subprocess.CREATE_NEW_CONSOLE)
 
 
 def print_loading_animation(i):
-    if i == -1: return    
+    if i == -1: return
     loading = "|/-\\"
     time_in_seconds = i // 2
     sys.stdout.write("\rwaiting... {} (Time: {}:{}{})".format(
@@ -101,7 +103,7 @@ def print_loading_animation(i):
         time_in_seconds // 60,
         "0" if time_in_seconds % 60 < 10 else "",
         time_in_seconds % 60
-        ))
+    ))
     sys.stdout.flush()
 
 
