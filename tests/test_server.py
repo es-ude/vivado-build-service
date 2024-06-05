@@ -1,14 +1,14 @@
 from unittest import TestCase
 import filecmp
 import logging
-import time
 import threading
 
 import os
+
 os.chdir('../../vivado-test-runner')
 
 from src import config
-from src.filehandler import reset
+from src.filehandler import reset_test
 import server
 import client
 
@@ -18,7 +18,7 @@ logging.getLogger().setLevel(logging.INFO)
 class Test(TestCase):
     def setUp(self) -> None:
         try:
-            reset()
+            reset_test()
             HOST, PORT = config['host'], config['port']
 
             def run_server():
@@ -35,13 +35,12 @@ class Test(TestCase):
 
             server_thread.join()
             client_thread.join()
-        
+
         except Exception as e:
             print(f"Error: {e}")
 
-
     def tearDown(self) -> None:
-       # reset()
+        reset_test()
         return super().tearDown()
 
     def test_files_equal(self):
@@ -58,7 +57,7 @@ class Test(TestCase):
 def compare_directories(dir1, dir2):
     dirs_cmp = filecmp.dircmp(dir1, dir2, ignore=['result'])
     if len(dirs_cmp.left_only) > 0 or len(dirs_cmp.right_only) > 0 or \
-       len(dirs_cmp.funny_files) > 0:
+            len(dirs_cmp.funny_files) > 0:
         return False
     (_, mismatch, errors) = filecmp.cmpfiles(
         dir1, dir2, dirs_cmp.common_files, shallow=False)

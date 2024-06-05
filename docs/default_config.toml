@@ -1,0 +1,34 @@
+#   Configure your program here and
+#   rename this file to 'config.toml' for changes to apply.
+[Paths]
+send = 'tmp/client'
+receive = 'tmp/server'
+request = 'build.zip'
+result = '/result'
+tcl_script = 'scripts/tcl/create_project_full_run.tcl'
+bash_script = 'scripts/bash/autobuild_'
+constraints = 'scripts/constraints/env5_config.xdc'
+
+[Connection]
+chunk_size = 1024
+delimiter = '100100010'
+host = 'localhost'
+port = 2024
+
+#   VNC 'username' and 'ip address' must be configured in order to function!
+#   'username' is the name of the user profile for vivado synthesis on your server.
+#   'ip address' is the ip address of your server.
+[VNC]
+username = 'admin'
+ip_address = 'localhost'
+
+[Database]
+DB_URL = 'sqlite://tasks.db'
+
+[Debug]
+debug_user = 'debug'
+example_build = '../build_dir/'
+
+[Tests]
+test_bash_script = 'scripts/bash/testing.sh'
+test_packet = 'tests/build_dir'

@@ -10,15 +10,15 @@ request_file = config['request']
 bash_script = config['bash script']
 test_packet = config['test packet']
 
-
 send_file = os.path.join(send_dir, request_file)
+
 
 def prepare_request(directories, user):  # Client
     file_list = []
 
     for directory in directories:
         file_list += get_filepaths(directory)
-    
+
     task_dir = make_personal_dir(user, send_dir)
     filepath = '/'.join([task_dir, request_file])
     pack(file_list, filepath)
@@ -37,15 +37,15 @@ def process_response(data, task_dir):
 
 
 def process_request(data, user):  # Server
-        print("DEBUG " + user)
-        task_dir = make_personal_dir(user, receive_dir)
-        filepath = '/'.join([task_dir, request_file])
-        
-        deserialize(data, filepath)
-        unpack(filepath, task_dir)
-        os.remove(filepath)
+    print("DEBUG " + user)
+    task_dir = make_personal_dir(user, receive_dir)
+    filepath = '/'.join([task_dir, request_file])
 
-        return task_dir
+    deserialize(data, filepath)
+    unpack(filepath, task_dir)
+    os.remove(filepath)
+
+    return task_dir
 
 
 def prepare_response(result_directory):
@@ -69,20 +69,20 @@ def make_personal_dir(user, directory):
             queue_priority = 1
         else:
             queue_priority = max([int(_dir) for _dir in user_dir_contents]) + 1
-    
-    task_dir = os.path.join(client_dir, str(queue_priority)) 
+
+    task_dir = os.path.join(client_dir, str(queue_priority))
     os.mkdir(task_dir)
 
     return task_dir
 
 
 def get_filepaths(directory):
-  filepaths = []
-  for root, _, files in os.walk(directory):
-    for file in files:
-      filepath = os.path.join(root, file)
-      filepaths.append(filepath)
-  return filepaths
+    filepaths = []
+    for root, _, files in os.walk(directory):
+        for file in files:
+            filepath = os.path.join(root, file)
+            filepaths.append(filepath)
+    return filepaths
 
 
 def serialize(file):
@@ -133,6 +133,21 @@ def reset():
     clear(receive_dir)
 
 
+def reset_test():
+    test_dir_client = os.path.join(send_dir, 'test')
+    test_dir_server = os.path.join(receive_dir, 'test')
+
+    try:
+        clear(test_dir_client)
+        clear(test_dir_server)
+
+        os.remove(test_dir_client)
+        os.remove(test_dir_server)
+
+    finally:
+        pass
+
+
 def remove(directory):
     shutil.rmtree(directory)
 
@@ -140,10 +155,10 @@ def remove(directory):
 def create_file(file, directory):
     os.mkdir(directory)
     filepath = '/'.join([directory, file])
-    
+
     with open(filepath, 'a'):
         pass
-         
+
 
 def dos2unix(origin, destination):
     with open(destination, "w") as fout:

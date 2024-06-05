@@ -78,7 +78,8 @@ def setup(HOST, PORT, testing=False):
             break
 
         print_loading_animation(i)
-        if i != -1: i += 1
+        if i != -1:
+            i += 1
 
     process_response(response, task_dir)
 
