@@ -10,26 +10,26 @@ import sys
 
 logging.getLogger().setLevel(logging.INFO)
 
-chunk_size = config['chunk size']
-delimiter = config['delimiter'].encode()
-HOST, PORT = config['host'], config['port']
+chunk_size = config['Connection']['chunk_size']
+delimiter = config['Connection']['delimiter'].encode()
+test_packet = [config['Test']['test_packet']]
+debug_user, debug_build = config['Debug']['user'], [config['Debug']['build']]
+username, ip = config['VNC']['username'], config['VNC']['ip_address']
+HOST, PORT = config['Connection']['host'], config['Connection']['port']
 
 try:
     username = sys.argv[1]
     directories = sys.argv[2:]
-except:  # Debug Mode
-    reset()
-    username = config['debug user']
-    directories = ['../build_dir/srcs']
+except IndexError as e:
+    # Omit System Arguments To Send A Quick Sample
+    username = debug_user
+    directories = debug_build
 
 
 def setup(HOST, PORT, testing=False):
-    global directories
-    global username
-
     if testing:
-        username = 'testing'
-        directories = [config['test packet']]
+        username = 'test'
+        directories = test_packet
 
     request, task_dir = prepare_request(directories, username)
     data = delimiter.join([username.encode(), request]) + delimiter
@@ -96,7 +96,9 @@ def forward_port(host, port, username, ip):
 
 
 def print_loading_animation(i):
-    if i == -1: return
+    if i == -1:
+        return
+
     loading = "|/-\\"
     time_in_seconds = i // 2
     sys.stdout.write("\rwaiting... {} (Time: {}:{}{})".format(
@@ -109,8 +111,6 @@ def print_loading_animation(i):
 
 
 def main():
-    username = config['username']
-    ip = config['ip address']
     forward_port(HOST, PORT, username, ip)
     setup(HOST, PORT)
 

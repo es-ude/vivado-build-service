@@ -15,7 +15,7 @@ class Task(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
 
 
-engine = create_engine(config['DB URL'], echo=True)
+engine = create_engine(config['Database']['DB_URL'], echo=True)
 Base.metadata.create_all(engine)
 
 Session = sessionmaker(bind=engine)

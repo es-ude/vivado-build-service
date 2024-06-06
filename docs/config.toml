@@ -26,9 +26,9 @@ ip_address = '65.108.38.237'
 DB_URL = 'sqlite://tasks.db'
 
 [Debug]
-debug_user = 'debug'
-example_build = '../build_dir/'
+user = 'debug'
+build = '../build_dir/srcs'
 
-[Tests]
-test_bash_script = 'scripts/bash/testing.sh'
+[Test]
+bash_script = 'scripts/bash/testing.sh'
 test_packet = 'tests/build_dir'

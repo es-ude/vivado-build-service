@@ -4,11 +4,11 @@ import zipfile
 import shutil
 import os
 
-send_dir = config['send']
-receive_dir = config['receive']
-request_file = config['request']
-bash_script = config['bash script']
-test_packet = config['test packet']
+send_dir = config['Paths']['send']
+receive_dir = config['Paths']['receive']
+request_file = config['Paths']['request']
+bash_script = config['Paths']['bash_script']
+test_packet = config['Test']['test_packet']
 
 send_file = os.path.join(send_dir, request_file)
 
@@ -37,7 +37,6 @@ def process_response(data, task_dir):
 
 
 def process_request(data, user):  # Server
-    print("DEBUG " + user)
     task_dir = make_personal_dir(user, receive_dir)
     filepath = '/'.join([task_dir, request_file])
 
@@ -137,15 +136,12 @@ def reset_test():
     test_dir_client = os.path.join(send_dir, 'test')
     test_dir_server = os.path.join(receive_dir, 'test')
 
-    try:
+    if os.path.isdir(test_dir_client) and os.path.isdir(test_dir_server):
         clear(test_dir_client)
         clear(test_dir_server)
 
-        os.remove(test_dir_client)
-        os.remove(test_dir_server)
-
-    finally:
-        pass
+        os.rmdir(test_dir_client)
+        os.rmdir(test_dir_server)
 
 
 def remove(directory):
@@ -154,7 +150,7 @@ def remove(directory):
 
 def create_file(file, directory):
     os.mkdir(directory)
-    filepath = '/'.join([directory, file])
+    filepath = os.path.join(directory, file)
 
     with open(filepath, 'a'):
         pass

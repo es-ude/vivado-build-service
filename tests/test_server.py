@@ -4,54 +4,39 @@ import logging
 import threading
 
 import os
-
 os.chdir('../../vivado-test-runner')
 
+from src.filehandler import reset
 from src import config
-from src.filehandler import reset_test
 import server
 import client
 
 logging.getLogger().setLevel(logging.INFO)
 
+test_packet = config['Test']['test_packet']
+HOST, PORT = config['Connection']['host'], config['Connection']['port']
+
 
 class Test(TestCase):
     def setUp(self) -> None:
-        try:
-            reset_test()
-            HOST, PORT = config['host'], config['port']
+        def run_server():
+            server.setup(testing=True)
 
-            def run_server():
-                server.setup(testing=True)
+        def run_client():
+            client.setup(HOST, PORT, testing=True)
 
-            def run_client():
-                client.setup(HOST, PORT, testing=True)
+        server_thread = threading.Thread(target=run_server)
+        client_thread = threading.Thread(target=run_client)
 
-            server_thread = threading.Thread(target=run_server)
-            client_thread = threading.Thread(target=run_client)
+        server_thread.start()
+        client_thread.start()
 
-            server_thread.start()
-            client_thread.start()
-
-            server_thread.join()
-            client_thread.join()
-
-        except Exception as e:
-            print(f"Error: {e}")
-
-    def tearDown(self) -> None:
-        reset_test()
-        return super().tearDown()
+        server_thread.join()
+        client_thread.join()
 
     def test_files_equal(self):
-        directory_server = 'tmp/server/testing/1/'
-        directory_test_packet = config['test packet']
-
-        try:
-            self.assertTrue(compare_directories(directory_test_packet, directory_server))
-
-        except Exception as e:
-            self.fail(e)
+        directory_server = 'tmp/server/test/1/'
+        self.assertTrue(compare_directories(test_packet, directory_server))
 
 
 def compare_directories(dir1, dir2):

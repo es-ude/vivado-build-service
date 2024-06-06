@@ -1,5 +1,5 @@
 from . import config
-delimiter = config['delimiter'].encode()
+delimiter = config['Connection']['delimiter'].encode()
 
 
 def find_delimiter_index(stream):
