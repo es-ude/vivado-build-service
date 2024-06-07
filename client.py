@@ -13,25 +13,49 @@ logging.getLogger().setLevel(logging.INFO)
 chunk_size = config['Connection']['chunk_size']
 delimiter = config['Connection']['delimiter'].encode()
 test_packet = [config['Test']['test_packet']]
-debug_user, debug_build = config['Debug']['user'], [config['Debug']['build']]
-username, ip = config['VNC']['username'], config['VNC']['ip_address']
-HOST, PORT = config['Connection']['host'], config['Connection']['port']
+ip_address = config['VNC']['ip_address']
+vnc_user = config['VNC']['username']
+HOST = config['Connection']['host']
+PORT = config['Connection']['port']
 
-try:
-    username = sys.argv[1]
-    directories = sys.argv[2:]
-except IndexError as e:
-    # Omit System Arguments To Send A Quick Sample
-    username = debug_user
-    directories = debug_build
+username = None
+upload = None
+download = None
+only_bin = None
+
+
+def init_system_parameters():
+    global username, upload, download, only_bin
+
+    try:
+        username = sys.argv[1]
+        upload = [sys.argv[2]]
+        download = [sys.argv[3]]
+        flags = sys.argv[4:]
+        for flag in flags:
+            if flag == '--only-bin' or 'ob':
+                only_bin = True
+
+    except IndexError as e:
+        print('You forgot to pass some arguments!\n' +
+              'The command should look something like this:\n' +
+              '$ python client.py {username} {upload} {download} {flags (e.g. --only-bin)}\n\n' +
+              'Continuing with Sample Data...')
+
+        username = config['Debug']['user']
+        upload = [config['Debug']['build']]
+        download = ''
+        only_bin = False
 
 
 def setup(HOST, PORT, testing=False):
+    global username, upload, download, only_bin
+
     if testing:
         username = 'test'
-        directories = test_packet
+        upload = test_packet
 
-    request, task_dir = prepare_request(directories, username)
+    request, task_dir = prepare_request(upload, username)
     data = delimiter.join([username.encode(), request]) + delimiter
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -89,9 +113,9 @@ def check_socket(host, port):
         return sock.connect_ex((host, port)) == 0
 
 
-def forward_port(host, port, username, ip):
+def forward_port(host, port, vnc_user, ip_address):
     if check_socket:
-        subprocess.Popen("ssh -Y -L {}:{}:{} {}@{}".format(port, host, port, username, ip),
+        subprocess.Popen("ssh -Y -L {}:{}:{} {}@{}".format(port, host, port, vnc_user, ip_address),
                          creationflags=subprocess.CREATE_NEW_CONSOLE)
 
 
@@ -111,7 +135,7 @@ def print_loading_animation(i):
 
 
 def main():
-    forward_port(HOST, PORT, username, ip)
+    forward_port(HOST, PORT, vnc_user, ip_address)
     setup(HOST, PORT)
 
 

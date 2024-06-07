@@ -7,7 +7,6 @@ import os
 
 logging.getLogger().setLevel(logging.INFO)
 
-global bash_script
 tcl_script = os.path.abspath(config['Paths']['tcl_script'])
 constraints = os.path.abspath(config['Paths']['constraints'])
 bash_script = [os.path.abspath(config['Paths']['bash_script'] + 'unix.sh')]
@@ -46,8 +45,6 @@ class UserQueue:
 
 
 def execute(task, event, testing=False):
-    global bash_script
-
     if event.is_set():
         return
 

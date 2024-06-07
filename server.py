@@ -12,7 +12,6 @@ import os
 logging.getLogger().setLevel(logging.INFO)
 event = threading.Event()
 
-server_is_running = False
 chunk_size = config['Connection']['chunk_size']
 HOST, PORT = config['Connection']['host'], config['Connection']['port']
 
@@ -97,9 +96,12 @@ def setup_taskhandler(testing=False):
     return user_queue
 
 
-def setup_server(user_queue, testing=False):
-    global server_is_running
+server_is_running = False
 
+def test():
+    test2 = server_is_running
+
+def setup_server(user_queue, testing=False):
     with ThreadPoolExecutor(max_workers=12) as executor:
         with ThreadedTCPServer((HOST, PORT), ThreadedTCPHandler) as server:
             server.user_queue = user_queue
@@ -127,8 +129,10 @@ def shutdown(server):
 
 
 def main():
-    logging.info("Server starting up...")
-    setup()
+    try:
+        setup()
+    except Exception as e:
+        logging.error("Something went wrong: {}".format(e))
 
 
 if __name__ == '__main__':
