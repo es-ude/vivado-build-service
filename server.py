@@ -39,13 +39,16 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 def get_request(tcpHandler):
     data = b''
     client_address = ''
-    
+    download = ''
+    flags = []
+
     while True:
         chunk = tcpHandler.request.recv(chunk_size)
         data += chunk
 
         if not client_address:
             client_address, stream = split_stream(data)
+            download, stream = split_stream(stream)
             logging.info("Receiving data from '{}' {}.".format(client_address, tcpHandler.client_address))
             data = stream
 

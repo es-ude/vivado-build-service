@@ -18,23 +18,21 @@ vnc_user = config['VNC']['username']
 HOST = config['Connection']['host']
 PORT = config['Connection']['port']
 
-username = None
-upload = None
-download = None
-only_bin = None
+username = ''
+upload = ''
+download = ''
+flags = []
 
 
 def init_system_parameters():
-    global username, upload, download, only_bin
+    global username, upload, download, flags
 
     try:
         username = sys.argv[1]
         upload = [sys.argv[2]]
         download = [sys.argv[3]]
-        flags = sys.argv[4:]
-        for flag in flags:
-            if flag == '--only-bin' or 'ob':
-                only_bin = True
+        for flag in sys.argv[4:]:
+            flags.append(flag.encode())
 
     except IndexError as e:
         print('You forgot to pass some arguments!\n' +
@@ -45,7 +43,7 @@ def init_system_parameters():
         username = config['Debug']['user']
         upload = [config['Debug']['build']]
         download = ''
-        only_bin = False
+        flags = []
 
 
 def setup(HOST, PORT, testing=False):
@@ -56,7 +54,7 @@ def setup(HOST, PORT, testing=False):
         upload = test_packet
 
     request, task_dir = prepare_request(upload, username)
-    data = delimiter.join([username.encode(), request]) + delimiter
+    data = delimiter.join([username.encode(), download.encode()] + flags + [request]) + delimiter
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
