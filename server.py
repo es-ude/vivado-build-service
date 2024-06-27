@@ -100,11 +100,9 @@ def setup_taskhandler(testing=False):
 
 
 server_is_running = False
-
-def test():
-    test2 = server_is_running
-
 def setup_server(user_queue, testing=False):
+    global server_is_running
+
     with ThreadPoolExecutor(max_workers=12) as executor:
         with ThreadedTCPServer((HOST, PORT), ThreadedTCPHandler) as server:
             server.user_queue = user_queue
