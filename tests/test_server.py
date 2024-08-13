@@ -13,7 +13,7 @@ import client
 
 logging.getLogger().setLevel(logging.INFO)
 
-test_packet = config['Test']['test_packet']
+test_packet = 'tests/build_dir'
 HOST, PORT = config['Connection']['host'], config['Connection']['port']
 
 

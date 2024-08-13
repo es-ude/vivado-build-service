@@ -13,48 +13,50 @@ logging.getLogger().setLevel(logging.INFO)
 chunk_size = config['Connection']['chunk_size']
 delimiter = config['Connection']['delimiter'].encode()
 test_packet = [config['Test']['test_packet']]
-ip_address = config['VNC']['ip_address']
-vnc_user = config['VNC']['username']
-HOST = config['Connection']['host']
+ip_address = config['SSH']['ip_address']
+vnc_user = config['SSH']['username']
+#   HOST = config['Connection']['host']
 PORT = config['Connection']['port']
 
 username = ''
-upload = ''
-download = ''
-flags = []
+upload_data_folder = ''
+download_folder = ''
+only_bin_file = True
 
 
 def init_system_parameters():
-    global username, upload, download, flags
+    global username, upload_data_folder, download_folder, only_bin_file
 
     try:
         username = sys.argv[1]
-        upload = [sys.argv[2]]
-        download = [sys.argv[3]]
-        for flag in sys.argv[4:]:
-            flags.append(flag.encode())
+        upload_data_folder = [sys.argv[2]]
+        download_folder = [sys.argv[3]]
+        try:
+            only_bin_file = bool(sys.argv[4])
+        except:
+            only_bin_file = False
 
     except IndexError as e:
         print('You forgot to pass some arguments!\n' +
               'The command should look something like this:\n' +
-              '$ python client.py {username} {upload} {download} {flags (e.g. --only-bin)}\n\n' +
+              '$ python client.py {username} {upload} {download} {only-bin)}\n\n' +
               'Continuing with Sample Data...')
 
         username = config['Debug']['user']
-        upload = [config['Debug']['build']]
-        download = ''
-        flags = []
+        upload_data_folder = [config['Debug']['build']]
+        download_folder = ''
+        only_bin_file = False
 
 
-def setup(HOST, PORT, testing=False):
-    global username, upload, download, only_bin
+def setup(PORT, HOST='localhost', testing=False):
+    global username, upload_data_folder, download_folder, only_bin_file
 
     if testing:
         username = 'test'
-        upload = test_packet
+        upload_data_folder = test_packet
 
-    request, task_dir = prepare_request(upload, username)
-    data = delimiter.join([username.encode(), download.encode()] + flags + [request]) + delimiter
+    request, task_dir = prepare_request(upload_data_folder, username)
+    data = delimiter.join([username.encode(), download_folder.encode()] + flags + [request]) + delimiter
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -111,7 +113,7 @@ def check_socket(host, port):
         return sock.connect_ex((host, port)) == 0
 
 
-def forward_port(host, port, vnc_user, ip_address):
+def forward_port(host='localhost', port, vnc_user, ip_address):
     if check_socket:
         subprocess.Popen("ssh -Y -L {}:{}:{} {}@{}".format(port, host, port, vnc_user, ip_address),
                          creationflags=subprocess.CREATE_NEW_CONSOLE)

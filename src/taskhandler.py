@@ -44,7 +44,7 @@ class UserQueue:
         return task
 
 
-def execute(task, event, testing=False):
+def execute(task, config, event, testing=False):
     if event.is_set():
         return
 
