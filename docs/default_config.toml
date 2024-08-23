@@ -26,6 +26,6 @@ debug_user = 'debug'
 example_build = '../build_dir/'
 
 #   Developer Options
-[Tests]
+[Test]
 test_bash_script = 'scripts/bash/testing.sh'
 test_packet = 'tests/build_dir'

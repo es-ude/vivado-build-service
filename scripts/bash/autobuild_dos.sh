@@ -6,7 +6,7 @@
 # $5 filepath to constraints
 
 # Clear auto_build folder
-rm -rf /home/"$1"/.autobuild/*
+rm -rf .autobuild/*
 
 # Make directories for Vivado
 mkdir /home/"$1"/.autobuild/input_srcs

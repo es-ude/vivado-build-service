@@ -1,9 +1,10 @@
 #   Configure your program here and
-#   rename this file to 'config.toml' for changes to apply.
+#   rename this file to 'server_config.toml' for changes to apply.
+username = 'dominik'
+
 [Paths]
-send = 'tmp/client'
-receive = 'tmp/server'
-request = 'build.zip'
+receive_folder = 'tmp/server'
+request_file = 'build.zip'
 result = '/result'
 tcl_script = 'scripts/tcl/create_project_full_run.tcl'
 bash_script = 'scripts/bash/autobuild_'
@@ -18,6 +19,6 @@ port = 2024
 
 
 #   Developer Options
-[Tests]
-test_bash_script = 'scripts/bash/testing.sh'
+[Test]
+bash_script = 'scripts/bash/testing.sh'
 test_packet = 'tests/build_dir'

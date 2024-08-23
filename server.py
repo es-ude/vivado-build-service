@@ -1,178 +1,144 @@
-import dataclasses
+import subprocess
+import sys
+from pathlib import Path
 
-from src.filehandler import process_request, prepare_response
-from src.streamutil import split_stream, end_reached, remove_delimiter
-from src.taskhandler import UserQueue, execute
-from src import config
+import tomli
+
+from src.server_config import ServerConfig
+from src.user_queue import UserQueue
 
 from concurrent.futures import ThreadPoolExecutor
-import socketserver
 import threading
 import logging
 import os
 
+from src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
+
 logging.getLogger().setLevel(logging.INFO)
-event = threading.Event()
 
 
-
-
-@dataclasses.dataclass
-class ServerConfig:
-    chunk_size: int
-    PORT: str
-    tcl_script: str
-    constraints: str
-    bash_script: str
-    test_bash_script: str
-    vnc_user: str
+def load_config_from_toml(path: Path) -> ServerConfig:
+        with open(path, 'rb') as f:
+            config = tomli.load(f)
+        return ServerConfig(
+            chunk_size=int(config['Connection']['chunk_size']),
+            PORT=int(config['Connection']['port']),
+            tcl_script=os.path.abspath(config['Paths']['tcl_script']),
+            constraints=os.path.abspath(config['Paths']['constraints']),
+            bash_script=os.path.abspath(config['Paths']['bash_script'] + 'unix.sh'),
+            test_bash_script=os.path.abspath(config['Test']['bash_script']),
+            request_file=os.path.abspath(config['Paths']['request_file']),
+            receive_folder=os.path.abspath(config['Paths']['receive_folder']),
+            vnc_user=config['username']
+        )
 
 
 class Server:
-    def __init__(self):
-        self.chunk_size: int = 0
-        self.PORT: str = ''
-        self.tcl_script: str = ''
-        self.constraints: str = ''
-        self.bash_script: str = ''
-        self.test_bash_script: str = ''
-        self.vnc_user: str = ''
+    def __init__(self, server_config: ServerConfig):
+        self.event = threading.Event()
+        self.server_config: ServerConfig = server_config
+        self.user_queue = UserQueue()
+        self._server_loop_thread = threading.Thread(target=self._run_forever)
+        self._server_loop_thread.daemon = True
 
-    def load_config_from_server_config(self, server_config: ServerConfig):
-        pass
+        self._server_thread = None
+        self._executor = ThreadPoolExecutor(max_workers=self.server_config.num_workers)
 
-    def load_config_from_toml(self) -> None:
-        self.server_config = ServerConfig(
-            chunk_size=config['Connection']['chunk_size']
-        )
+    def start(self):
+        self._server_loop_thread.start()
+        logging.info('server loop started.')
+        server = ThreadedTCPServer(('localhost', self.server_config.PORT),
+                                   ThreadedTCPHandler,
+                                   self.user_queue,
+                                   self.server_config)
+        self._server_thread = threading.Thread(target=server.serve_forever)
+        self._server_thread.daemon = True
+        self._server_thread.start()
+        logging.info("Server is running.")
+        logging.info("Waiting for connection...")
 
-        PORT = config['Connection']['port']
-        tcl_script = os.path.abspath(config['Paths']['tcl_script'])
-        constraints = os.path.abspath(config['Paths']['constraints'])
-        bash_script = [os.path.abspath(config['Paths']['bash_script'] + 'unix.sh')]
-        test_bash_script = [os.path.abspath(config['Test']['bash_script'])]
-        vnc_user = config['VNC']['username']
-
-
-class ThreadedTCPHandler(socketserver.BaseRequestHandler):
-    def handle(self):
-        user_queue = self.server.user_queue
-        testing = self.server.testing
-        data, client_address = get_request(self)
-        task_directory = process_request(data, client_address)
-        result_directory = task_directory + '/result'
-        os.mkdir(result_directory)
-
-        user_queue.enqueue_task(task=task_directory)
-        await_task_completion(result_directory + '/output')
-        response = prepare_response(result_directory)
-        send(self, response)
-
-        if testing:
-            shutdown(self.server)
-
-        self.request.close()
-
-
-def get_request(tcp_handler):
-    data = b''
-    client_address = ''
-    download = ''
-    only_bin_file = True
-
-    while True:
-        chunk = tcp_handler.request.recv(chunk_size)
-        data += chunk
-
-        if not client_address:
-            client_address, stream = split_stream(data)
-            download, stream = split_stream(stream)
-            logging.info("Receiving data from '{}' {}.".format(client_address, tcp_handler.client_address))
-            data = stream
-
-        if len(chunk) < chunk_size or end_reached(chunk):
-            break    
-
-    data = remove_delimiter(data)
-    return data, client_address
-
-
-def send(tcp_handler, response):
-    for i in range(0, len(response), chunk_size):
-        chunk = response[i:i + chunk_size]
-        tcp_handler.request.sendall(chunk)
-
-
-def await_task_completion(directory):
-    while True:
-        if not os.path.exists(directory):
-            continue
-        for fname in os.listdir(directory):
-            if fname.endswith('.bin'):
-                return
-
-
-def task_worker(user_queue, event, testing=False):
-    with ThreadPoolExecutor(max_workers=12) as executor:
+    def _run_forever(self):
         while True:
-            if event.is_set():
+            if self.event.is_set():
                 break
 
-            task = user_queue.dequeue_task()
-            if task is None:
-                continue
+            task = self.user_queue.dequeue_task()
 
-            executor.submit(execute, task, config, event, testing)
-    
+            self._executor.submit(execute, task, self.server_config, self.event)
 
-class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    pass
+    def stop(self):
+        del(self)
 
 
-def setup_taskhandler(testing=False):
-    user_queue = UserQueue()
-    taskhandler_thread = threading.Thread(target=task_worker, args=(user_queue, event, testing))
-    taskhandler_thread.daemon = True
-    taskhandler_thread.start()
-    return user_queue
+def execute(task, server_config, event):
+    if event.is_set():
+        return
+
+    client_id = os.path.split(os.path.split(task)[0])[1]
+    task_id = os.path.split(task)[1]
+    result_dir = os.path.abspath(task + '/result')
+    task_path = os.path.abspath(task)
+
+    logging.info("Handling task for {}: Task nr. {}\n".format(client_id, task_id))
+
+    _delete_report_lines_in_dir(os.path.abspath(task))
+
+    bash_arguments = [
+        server_config.vnc_user,
+        server_config.tcl_script,
+        task_path,
+        result_dir,
+        server_config.constraints
+    ]
+
+    if server_config.isTest:
+        _run_bash_script(server_config.test_bash_script, bash_arguments)
+    else:
+        _run_bash_script(server_config.bash_script, bash_arguments)
+
+    # Insert data in DB - This part is not yet implemented
+
+    logging.info("Task done for {}: Task nr. {} \n".format(client_id, task_id))
 
 
-server_is_running = False
-def setup_server(user_queue, testing=False):
-    global server_is_running
+def _run_bash_script(bash_script: str, bash_arguments: list[str]):
+    cygwin_path = ['C:\\cygwin64\\bin\\bash.exe', '-l']
+    os_is_windows = sys.platform.startswith('win')
 
-    with ThreadPoolExecutor(max_workers=12) as executor:
-        with ThreadedTCPServer(('localhost', PORT), ThreadedTCPHandler) as server:
-            server.user_queue = user_queue
-            server.testing = testing
-            server_thread = threading.Thread(target=server.serve_forever)
-            server_thread.daemon = True
-            server_thread.start()
-            server_thread.join()
-
-            if not server_is_running:
-                server_is_running = True
-                logging.info("Server is running.")
-                logging.info("Waiting for connection...")
+    if os_is_windows:
+        subprocess.run(cygwin_path + [bash_script] + bash_arguments,
+                       capture_output=True, text=True, check=True)
+    else:
+        subprocess.run([bash_script] + bash_arguments,
+                       capture_output=True, text=True, check=True)
 
 
-def shutdown(server):
-    event.set()
-    server.shutdown()
-    logging.info("Server Shutdown")
-
-
-def setup(testing=False):
-    user_queue = setup_taskhandler(testing)
-    setup_server(user_queue, testing)
+def _delete_report_lines_in_dir(directory: str):
+    for (root, dirs, files) in os.walk(directory, topdown=True):
+        for file in files:
+            file_path = os.path.abspath(os.path.join(root, file))
+            with open(file_path, 'r+') as f:
+                lines = f.readlines()
+                f.seek(0)
+                for line in lines:
+                    if 'report' not in line:
+                        f.write(line)
+                f.truncate()
 
 
 def main():
     try:
-        setup()
+        server_config = load_config_from_toml(Path("docs/default_server_config.toml"))
+        server = Server(server_config)
+        server.start()
+
     except Exception as e:
         logging.error("Something went wrong: {}".format(e))
 
 
 if __name__ == '__main__':
-    main()
+    server_config = load_config_from_toml(Path("docs/default_server_config.toml"))
+    server = Server(server_config)
+    server.start()
+    while True:
+        ...

@@ -1,4 +1,7 @@
-from src.filehandler import prepare_request, process_response, reset
+import os
+
+from src.filehandler import prepare_request, process_response, reset, make_personal_dir, get_filepaths, serialize, pack, \
+    unpack, deserialize
 from src import config
 from contextlib import closing
 
@@ -132,6 +135,28 @@ def print_loading_animation(i):
         time_in_seconds % 60
     ))
     sys.stdout.flush()
+
+def prepare_request(directories, user):  # Client
+    file_list = []
+
+    for directory in directories:
+        file_list += get_filepaths(directory)
+
+    task_dir = make_personal_dir(user, send_dir)
+    filepath = '/'.join([task_dir, request_file])
+    pack(file_list, filepath)
+
+    return serialize(filepath), task_dir
+
+
+def process_response(data, task_dir):
+    result_dir = task_dir + '/result'
+    filepath = result_dir + '/result.zip'
+
+    os.mkdir(result_dir)
+    deserialize(data, filepath)
+    unpack(filepath, result_dir)
+    os.remove(filepath)
 
 
 def main():
