@@ -23,7 +23,7 @@ class Test(TestCase):
             server.setup(testing=True)
 
         def run_client():
-            client.setup(HOST, PORT, testing=True)
+            client.build(HOST, PORT, testing=True)
 
         server_thread = threading.Thread(target=run_server)
         client_thread = threading.Thread(target=run_client)
@@ -54,3 +54,15 @@ def compare_directories(dir1, dir2):
         if not compare_directories(new_dir1, new_dir2):
             return False
     return True
+
+
+def reset_test():
+    test_dir_client = os.path.join(send_dir, 'test')
+    test_dir_server = os.path.join(receive_dir, 'test')
+
+    if os.path.isdir(test_dir_client) and os.path.isdir(test_dir_server):
+        clear(test_dir_client)
+        clear(test_dir_server)
+
+        os.rmdir(test_dir_client)
+        os.rmdir(test_dir_server)

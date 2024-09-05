@@ -2,18 +2,22 @@ import logging
 import os
 import socketserver
 
-from src.filehandler import make_personal_dir, deserialize, unpack, get_filepaths, \
-    pack, serialize
-from src.server_config import ServerConfig
+from src.filehandler import make_personal_dir, deserialize, unpack, get_filepaths, pack, serialize
+from src.config import ServerConfig, GeneralConfig, default_general_config
 from src.streamutil import split_stream, end_reached, remove_delimiter
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    def __init__(self, server_address, request_handler_class, user_queue, server_config):
+    def __init__(self, server_address, request_handler_class, user_queue, server_config, event, general_config=None):
         socketserver.ThreadingMixIn.__init__(self)
         socketserver.TCPServer.__init__(self, server_address, request_handler_class)
+        self.event = event
         self.user_queue = user_queue
         self.server_config = server_config
+        if general_config:
+            self.general_config = general_config
+        else:
+            self.general_config = default_general_config
 
 
 class ThreadedTCPHandler(socketserver.BaseRequestHandler):
@@ -24,6 +28,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         user_queue = self.server.user_queue
         server_config = self.server.server_config
+        general_config = self.server.general_config
         data, client_address = self.get_request(self, server_config)
         task_directory = self.process_request(data, client_address)
         result_directory = task_directory + '/result'
@@ -31,46 +36,46 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
         user_queue.enqueue_task(task=task_directory)
         self.await_task_completion(result_directory + '/output')
-        response = prepare_response(result_directory)
+        response = prepare_response(result_directory, task_directory)
         self.send(self, response, server_config)
 
-        if server_config.isTest:
+        if general_config.is_test:
             self.shutdown()
 
         self.request.close()
 
-
-
-    def send(self, tcp_handler, response, server_config: ServerConfig):
-        for i in range(0, len(response), server_config.chunk_size):
-            chunk = response[i:i + server_config.chunk_size]
+    def send(self, tcp_handler, response, general_config: GeneralConfig):
+        for i in range(0, len(response), self.server.general_config.chunk_size):
+            chunk = response[i:i + self.server.general_config.chunk_size]
             tcp_handler.request.sendall(chunk)
 
     def shutdown(self):
-        self.event.set()
+        # self.event.set()
         self.server.shutdown()
         logging.info("Server Shutdown")
 
-    def get_request(self, tcp_handler, server_config: ServerConfig):
+    def get_request(self, tcp_handler, general_config: GeneralConfig):
         data = b''
         client_address = ''
         download = ''
         only_bin_file = True
 
         while True:
-            chunk = tcp_handler.request.recv(server_config.chunk_size)
+            chunk = tcp_handler.request.recv(self.server.general_config.chunk_size)
             data += chunk
 
             if not client_address:
-                client_address, stream = split_stream(data)
-                download, stream = split_stream(stream)
+                client_address, stream = split_stream(data, self.server.general_config.delimiter.encode())
+                only_bin_file, stream = split_stream(stream, self.server.general_config.delimiter.encode())
+                only_bin_file = bool(only_bin_file)
                 logging.info("Receiving data from '{}' {}.".format(client_address, tcp_handler.client_address))
                 data = stream
 
-            if len(chunk) < server_config.chunk_size or end_reached(chunk):
+            if (len(chunk) < self.server.general_config.chunk_size or
+                    end_reached(chunk, self.server.general_config.delimiter)):
                 break
 
-        data = remove_delimiter(data)
+        data = remove_delimiter(data, self.server.general_config.delimiter)
         return data, client_address
 
     def await_task_completion(self, directory):
@@ -82,8 +87,8 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                     return
 
     def process_request(self, data, user, ):  # Server
-        task_dir = make_personal_dir(user, self.server.server_config.receive)
-        filepath = '/'.join([task_dir, self.server.server_config.request])
+        task_dir = make_personal_dir(user, self.server.server_config.receive_folder)
+        filepath = '/'.join([task_dir, self.server.general_config.request_file])
 
         deserialize(data, filepath)
         unpack(filepath, task_dir)
@@ -92,10 +97,9 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         return task_dir
 
 
-def prepare_response(result_directory):
+def prepare_response(result_directory, task_directory):
     files = get_filepaths(result_directory)
     filepath = '/'.join([result_directory, 'result.zip'])
-    pack(files, filepath)
-
+    pack(base_folder=task_directory, origin=files, destination=filepath)
 
     return serialize(filepath)

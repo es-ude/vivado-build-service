@@ -17,7 +17,8 @@ port = 2024
 #   SSH 'username' and 'ip address' must be configured in order to function
 #   'username' is the name of the user profile for vivado synthesis on your server.
 #   'ip address' is the ip address of your server.
-# Client [SSH]
+# Client
+[SSH]
 username = '{your username}'
 ip_address = '{server ip}'
 

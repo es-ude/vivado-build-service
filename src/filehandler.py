@@ -1,3 +1,4 @@
+from pathlib import Path
 from zipfile import ZipFile
 import zipfile
 import shutil
@@ -43,14 +44,11 @@ def deserialize(stream, destination):
         file.write(stream)
 
 
-def pack(origin, destination):
+def pack(base_folder, origin, destination):
     with ZipFile(destination, 'w', zipfile.ZIP_DEFLATED) as archive:
         for filepath in origin:
-            if test_packet in filepath:
-                relative_path = os.path.relpath(filepath, os.path.abspath(test_packet))
-            else:
-                relative_path = os.path.relpath(filepath, destination)
-            archive.write(filepath, relative_path)
+            relative_path = filepath.replace(base_folder,'')
+            archive.write(filepath, arcname=relative_path)
 
 
 def unpack(origin, destination):
@@ -74,23 +72,6 @@ def clear(directory):
         for _dir in dirs:
             shutil.rmtree(os.path.join(root, _dir))
             print("Removed directory '{}'".format(_dir))
-
-
-def reset():
-    clear(send_dir)
-    clear(receive_dir)
-
-
-def reset_test():
-    test_dir_client = os.path.join(send_dir, 'test')
-    test_dir_server = os.path.join(receive_dir, 'test')
-
-    if os.path.isdir(test_dir_client) and os.path.isdir(test_dir_server):
-        clear(test_dir_client)
-        clear(test_dir_server)
-
-        os.rmdir(test_dir_client)
-        os.rmdir(test_dir_server)
 
 
 def remove(directory):

@@ -1,24 +1,14 @@
 #   Configure your program here and
 #   rename this file to 'client_config.toml' for changes to apply.
+queue_user = '{your username}'
 
-# This part Must be identical to Server
-[Connection]
-chunk_size = 1024
-delimiter = '100100010'
-port = 2024
-
-#   SSH 'username' and 'ip address' must be configured in order to function
-#   'username' is the name of the user profile for vivado synthesis on your server.
+#   [server]: 'username' and [server]: 'ip address' must be configured in order to function
+#   'vivado_user' is the name of the user profile for vivado synthesis on your server.
 #   'ip address' is the ip address of your server.
-[SSH]
-username = '{your username}'
+[server]
+vivado_user = '{your vivado profile username}'
 ip_address = '{server ip}'
+port = '{server port}'
 
-[Debug]
-debug_user = 'debug'
-example_build = '../build_dir/'
-
-#   Developer Options
-[Test]
-test_bash_script = 'scripts/bash/testing.sh'
-test_packet = 'tests/build_dir'
+[paths]
+send_dir = 'tmp/client'

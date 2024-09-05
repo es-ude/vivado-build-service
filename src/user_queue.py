@@ -1,8 +1,4 @@
-import logging
 import time
-
-logging.getLogger().setLevel(logging.INFO)
-task_is_finished = False  # May be omitted
 
 
 class UserQueue:

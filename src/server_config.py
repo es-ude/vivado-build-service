@@ -11,7 +11,7 @@ class ServerConfig:
     test_bash_script: str
     request_file: str
     receive_folder: str
-    vnc_user: str
+    ssh_username: str
     num_workers: int = 12
     isTest: bool = False
 

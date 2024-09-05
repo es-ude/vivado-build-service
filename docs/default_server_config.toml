@@ -1,24 +1,13 @@
 #   Configure your program here and
 #   rename this file to 'server_config.toml' for changes to apply.
-username = 'dominik'
+[server]
+vivado_user = '{your vivado profile username}'
+port = '{server port}'
 
-[Paths]
+[paths]
 receive_folder = 'tmp/server'
 request_file = 'build.zip'
 result = '/result'
 tcl_script = 'scripts/tcl/create_project_full_run.tcl'
 bash_script = 'scripts/bash/autobuild_'
 constraints = 'scripts/constraints/env5_config.xdc'
-
-
-# Must be identical to Client Connection
-[Connection]
-chunk_size = 1024
-delimiter = '100100010'
-port = 2024
-
-
-#   Developer Options
-[Test]
-bash_script = 'scripts/bash/testing.sh'
-test_packet = 'tests/build_dir'
