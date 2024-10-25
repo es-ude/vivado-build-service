@@ -52,12 +52,10 @@ def pack(base_folder, origin, destination):
 
 
 def unpack(origin, destination):
-    print("\n Files located under '{}'".format(os.path.abspath(destination)))
+    print("\n Files located under '{}'\n".format(os.path.abspath(destination)))
     with ZipFile(origin, 'r') as archive:
         for file in archive.filelist:
             archive.extract(file, destination)
-
-    print("done unzipping")
 
 
 def clear(directory):

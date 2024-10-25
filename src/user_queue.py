@@ -17,8 +17,9 @@ class UserQueue:
         self.user_queues[client_id].append(task)
 
     def dequeue_task(self):
-        while len(self.user_queues) == 0:
+        if len(self.user_queues) == 0:
             time.sleep(0.1)
+            return
 
         next_user = self.next_users.pop(0)
 

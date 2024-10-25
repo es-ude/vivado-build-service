@@ -2,6 +2,7 @@ import math
 import shutil
 import threading
 import time
+from distutils.dir_util import copy_tree
 
 from src.config import ClientConfig, GeneralConfig, default_general_config
 from src.filehandler import make_personal_dir, get_filepaths, serialize, pack, unpack, deserialize
@@ -35,6 +36,7 @@ def load_client_config_from_toml(path: Path) -> ClientConfig:
 
 class Client:
     def __init__(self, client_config: ClientConfig, general_config: GeneralConfig = None):
+        self.task_dir = None
         self.client_config = client_config
         if general_config:
             self.general_config = general_config
@@ -42,6 +44,7 @@ class Client:
             self.general_config = default_general_config
         if not self.general_config.is_test:
             self._forward_port()
+        self.stop_loading_animation_event = threading.Event()
 
     def _forward_port(self):
         if check_socket:
@@ -55,6 +58,7 @@ class Client:
 
     def build(self, upload_dir, download_dir=None, only_bin_files=True):
         request, task_dir = self._prepare_request(upload_dir, self.client_config.queue_user)
+        self.task_dir = task_dir
         data = join_streams([
                 self.client_config.queue_user.encode(),
                 str(int(only_bin_files)).encode(),
@@ -64,7 +68,9 @@ class Client:
         response = self._send_and_receive(s, data)
         result_dir = process_response(response, task_dir)
         if download_dir:
-            shutil.copy(src=result_dir, dst=download_dir)
+            copy_tree(src=result_dir, dst=download_dir)
+        self.stop_loading_animation_event.set()
+        s.close()
 
     def _prepare_request(self, upload_directory: str, user: str) -> Tuple[str, str]:
         file_list = get_filepaths(upload_directory)
@@ -75,7 +81,7 @@ class Client:
         return serialize(target_filepath), task_dir
 
     def _send_and_receive(self, s: socket, data):
-        loading_animation = threading.Thread(target=print_loading_animation)
+        loading_animation = threading.Thread(target=print_loading_animation, args=(self.stop_loading_animation_event,))
         loading_animation.start()
         inputs, outputs = [s], [s]
         response = b''
@@ -84,15 +90,16 @@ class Client:
             readable, writable, exceptional = select.select(inputs, outputs, inputs, 0.5)
 
             for s in writable:
-                logging.info('sending...')
+                print('\n')
+                logging.info(':Client: Sending...\n')
                 s.send(data)
-                logging.info('sent!\n')
+                logging.info(':Client: Sent!')
                 outputs.remove(s)
 
             for s in readable:
                 chunk = s.recv(self.general_config.chunk_size)
                 if not chunk:
-                    logging.info('\nclosing...\n')
+                    logging.info(':Client: Closing...')
                     inputs.remove(s)
                     s.close()
                     break
@@ -100,7 +107,7 @@ class Client:
                 response += chunk
 
             for s in exceptional:
-                logging.info('\nerror')
+                logging.info(':Client: Error')
                 inputs.remove(s)
                 outputs.remove(s)
                 break
@@ -113,14 +120,14 @@ def connect_with_socket(host, port) -> socket.socket | None:
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        logging.info('connecting...')
+        logging.info(':Client: Connecting...')
         ret = s.connect_ex((host, port))
 
         if ret != 0:
-            logging.info('failed to connect!\n')
+            logging.info(':Client: failed to connect!\n')
             return
 
-        logging.info('connected!\n')
+        logging.info(':Client: Connected!\n')
         s.setblocking(False)
 
         return s
@@ -133,7 +140,7 @@ def check_socket(host, port):
         return sock.connect_ex((host, port)) == 0
 
 
-def print_loading_animation():
+def print_loading_animation(stop_event: threading.Event):
     index = 0
     elapsed_seconds = 0
     while True:
@@ -148,6 +155,8 @@ def print_loading_animation():
         time.sleep(.5)
         elapsed_seconds += .5
         index += 1
+        if stop_event.is_set():
+            break
 
 
 def process_response(data, task_dir):

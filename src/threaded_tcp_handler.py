@@ -3,21 +3,18 @@ import os
 import socketserver
 
 from src.filehandler import make_personal_dir, deserialize, unpack, get_filepaths, pack, serialize
-from src.config import ServerConfig, GeneralConfig, default_general_config
+from src.config import ServerConfig, GeneralConfig
 from src.streamutil import split_stream, end_reached, remove_delimiter
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    def __init__(self, server_address, request_handler_class, user_queue, server_config, event, general_config=None):
+    def __init__(self, server_address, request_handler_class, user_queue, server_config, event, general_config):
         socketserver.ThreadingMixIn.__init__(self)
         socketserver.TCPServer.__init__(self, server_address, request_handler_class)
         self.event = event
         self.user_queue = user_queue
         self.server_config = server_config
-        if general_config:
-            self.general_config = general_config
-        else:
-            self.general_config = default_general_config
+        self.general_config = general_config
 
 
 class ThreadedTCPHandler(socketserver.BaseRequestHandler):
@@ -35,13 +32,9 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         os.mkdir(result_directory)
 
         user_queue.enqueue_task(task=task_directory)
-        self.await_task_completion(result_directory + '/output')
+        await_task_completion(directory=result_directory + '/output')
         response = prepare_response(result_directory, task_directory)
         self.send(self, response, server_config)
-
-        if general_config.is_test:
-            self.shutdown()
-
         self.request.close()
 
     def send(self, tcp_handler, response, general_config: GeneralConfig):
@@ -50,9 +43,8 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
             tcp_handler.request.sendall(chunk)
 
     def shutdown(self):
-        # self.event.set()
         self.server.shutdown()
-        logging.info("Server Shutdown")
+        logging.info(":TCP: Server Shutdown")
 
     def get_request(self, tcp_handler, general_config: GeneralConfig):
         data = b''
@@ -68,7 +60,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                 client_address, stream = split_stream(data, self.server.general_config.delimiter.encode())
                 only_bin_file, stream = split_stream(stream, self.server.general_config.delimiter.encode())
                 only_bin_file = bool(only_bin_file)
-                logging.info("Receiving data from '{}' {}.".format(client_address, tcp_handler.client_address))
+                logging.info(":TCP: Receiving data from '{}' {}.\n".format(client_address, tcp_handler.client_address))
                 data = stream
 
             if (len(chunk) < self.server.general_config.chunk_size or
@@ -77,14 +69,6 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
         data = remove_delimiter(data, self.server.general_config.delimiter)
         return data, client_address
-
-    def await_task_completion(self, directory):
-        while True:
-            if not os.path.exists(directory):
-                continue
-            for filename in os.listdir(directory):
-                if filename.endswith('.bin'):
-                    return
 
     def process_request(self, data, user, ):  # Server
         task_dir = make_personal_dir(user, self.server.server_config.receive_folder)
@@ -95,6 +79,15 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         os.remove(filepath)
 
         return task_dir
+
+
+def await_task_completion(directory):
+    while True:
+        if not os.path.exists(directory):
+            continue
+        for filename in os.listdir(directory):
+            if filename.endswith('.bin'):
+                return
 
 
 def prepare_response(result_directory, task_directory):
