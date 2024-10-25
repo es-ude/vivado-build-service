@@ -12,23 +12,21 @@ constraints = 'scripts/constraints/env5_config.xdc'
 [Connection]
 chunk_size = 1024
 delimiter = '100100010'
-host = 'localhost'
 port = 2024
 
-#   VNC 'username' and 'ip address' must be configured in order to function!
+#   SSH 'username' and 'ip address' must be configured in order to function
 #   'username' is the name of the user profile for vivado synthesis on your server.
 #   'ip address' is the ip address of your server.
-[VNC]
-username = 'admin'
-ip_address = 'localhost'
-
-[Database]
-DB_URL = 'sqlite://tasks.db'
+# Client
+[SSH]
+username = '{your username}'
+ip_address = '{server ip}'
 
 [Debug]
 debug_user = 'debug'
 example_build = '../build_dir/'
 
-[Tests]
+#   Developer Options
+[Test]
 test_bash_script = 'scripts/bash/testing.sh'
 test_packet = 'tests/build_dir'

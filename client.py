@@ -1,7 +1,18 @@
-from src.filehandler import prepare_request, process_response, reset
-from src import config
-from contextlib import closing
+import math
+import shutil
+import threading
+import time
+from distutils.dir_util import copy_tree
 
+from src.config import ClientConfig, GeneralConfig, default_general_config
+from src.filehandler import make_personal_dir, get_filepaths, serialize, pack, unpack, deserialize
+from src.streamutil import join_streams
+
+from contextlib import closing
+from pathlib import Path
+from typing import Tuple
+import os
+import tomli
 import subprocess
 import logging
 import socket
@@ -10,100 +21,118 @@ import sys
 
 logging.getLogger().setLevel(logging.INFO)
 
-chunk_size = config['Connection']['chunk_size']
-delimiter = config['Connection']['delimiter'].encode()
-test_packet = [config['Test']['test_packet']]
-ip_address = config['VNC']['ip_address']
-vnc_user = config['VNC']['username']
-HOST = config['Connection']['host']
-PORT = config['Connection']['port']
 
-username = ''
-upload = ''
-download = ''
-flags = []
-
-
-def init_system_parameters():
-    global username, upload, download, flags
-
-    try:
-        username = sys.argv[1]
-        upload = [sys.argv[2]]
-        download = [sys.argv[3]]
-        for flag in sys.argv[4:]:
-            flags.append(flag.encode())
-
-    except IndexError as e:
-        print('You forgot to pass some arguments!\n' +
-              'The command should look something like this:\n' +
-              '$ python client.py {username} {upload} {download} {flags (e.g. --only-bin)}\n\n' +
-              'Continuing with Sample Data...')
-
-        username = config['Debug']['user']
-        upload = [config['Debug']['build']]
-        download = ''
-        flags = []
+def load_client_config_from_toml(path: Path) -> ClientConfig:
+    with open(path, 'rb') as f:
+        config = tomli.load(f)
+    return ClientConfig(
+        server_vivado_user=config['server']['vivado_user'],
+        server_port=int(config['server']['port']),
+        server_ip_address=config['server']['ip_address'],
+        queue_user=config['user']['queue_user'],
+        send_dir=config['paths']['send_dir']
+    )
 
 
-def setup(HOST, PORT, testing=False):
-    global username, upload, download, only_bin
+class Client:
+    def __init__(self, client_config: ClientConfig, general_config: GeneralConfig = None):
+        self.task_dir = None
+        self.client_config = client_config
+        if general_config:
+            self.general_config = general_config
+        else:
+            self.general_config = default_general_config
+        if not self.general_config.is_test:
+            self._forward_port()
+        self.stop_loading_animation_event = threading.Event()
 
-    if testing:
-        username = 'test'
-        upload = test_packet
+    def _forward_port(self):
+        if check_socket:
+            subprocess.Popen("ssh -Y -L {}:{}:{} {}@{}".format(
+                self.client_config.server_port,
+                'localhost',
+                self.client_config.server_port,
+                self.client_config.server_vivado_user,
+                self.client_config.server_ip_address
+            ), creationflags=subprocess.CREATE_NEW_CONSOLE)
 
-    request, task_dir = prepare_request(upload, username)
-    data = delimiter.join([username.encode(), download.encode()] + flags + [request]) + delimiter
+    def build(self, upload_dir, download_dir=None, only_bin_files=True):
+        request, task_dir = self._prepare_request(upload_dir, self.client_config.queue_user)
+        self.task_dir = task_dir
+        data = join_streams([
+                self.client_config.queue_user.encode(),
+                str(int(only_bin_files)).encode(),
+                request
+        ], self.general_config.delimiter.encode())
+        s = connect_with_socket(self.client_config.server_ip_address, self.client_config.server_port)
+        response = self._send_and_receive(s, data)
+        result_dir = process_response(response, task_dir)
+        if download_dir:
+            copy_tree(src=result_dir, dst=download_dir)
+        self.stop_loading_animation_event.set()
+        s.close()
 
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def _prepare_request(self, upload_directory: str, user: str) -> Tuple[str, str]:
+        file_list = get_filepaths(upload_directory)
+        task_dir = make_personal_dir(user, self.client_config.send_dir)
+        target_filepath = os.path.join(*[task_dir, self.general_config.request_file])
+        pack(base_folder=upload_directory, origin=file_list, destination=target_filepath)
 
-    logging.info('connecting...')
-    ret = s.connect_ex((HOST, PORT))
+        return serialize(target_filepath), task_dir
 
-    if ret != 0:
-        logging.info('failed to connect!\n')
-        return
+    def _send_and_receive(self, s: socket, data):
+        loading_animation = threading.Thread(target=print_loading_animation, args=(self.stop_loading_animation_event,))
+        loading_animation.start()
+        inputs, outputs = [s], [s]
+        response = b''
 
-    logging.info('connected!\n')
-    s.setblocking(False)
+        while inputs:
+            readable, writable, exceptional = select.select(inputs, outputs, inputs, 0.5)
 
-    i = 0
-    inputs, outputs = [s], [s]
-    response = b''
+            for s in writable:
+                print('\n')
+                logging.info(':Client: Sending...\n')
+                s.send(data)
+                logging.info(':Client: Sent!')
+                outputs.remove(s)
 
-    while inputs:
-        readable, writable, exceptional = select.select(inputs, outputs, inputs, 0.5)
+            for s in readable:
+                chunk = s.recv(self.general_config.chunk_size)
+                if not chunk:
+                    logging.info(':Client: Closing...')
+                    inputs.remove(s)
+                    s.close()
+                    break
 
-        for s in writable:
-            logging.info('sending...')
-            s.send(data)
-            logging.info('sent!\n')
-            outputs.remove(s)
+                response += chunk
 
-        for s in readable:
-            chunk = s.recv(chunk_size)
-            if not chunk:
-                logging.info('\nclosing...\n')
+            for s in exceptional:
+                logging.info(':Client: Error')
                 inputs.remove(s)
-                s.close()
-                i = -1
+                outputs.remove(s)
                 break
 
-            response += chunk
+        loading_animation.join(.1)
+        return response
 
-        for s in exceptional:
-            logging.info('\nerror')
-            inputs.remove(s)
-            outputs.remove(s)
-            i = -1
-            break
 
-        print_loading_animation(i)
-        if i != -1:
-            i += 1
+def connect_with_socket(host, port) -> socket.socket | None:
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    process_response(response, task_dir)
+        logging.info(':Client: Connecting...')
+        ret = s.connect_ex((host, port))
+
+        if ret != 0:
+            logging.info(':Client: failed to connect!\n')
+            return
+
+        logging.info(':Client: Connected!\n')
+        s.setblocking(False)
+
+        return s
+    except Exception as e:
+        print(e)
 
 
 def check_socket(host, port):
@@ -111,30 +140,52 @@ def check_socket(host, port):
         return sock.connect_ex((host, port)) == 0
 
 
-def forward_port(host, port, vnc_user, ip_address):
-    if check_socket:
-        subprocess.Popen("ssh -Y -L {}:{}:{} {}@{}".format(port, host, port, vnc_user, ip_address),
-                         creationflags=subprocess.CREATE_NEW_CONSOLE)
+def print_loading_animation(stop_event: threading.Event):
+    index = 0
+    elapsed_seconds = 0
+    while True:
+        loading = "|/-\\"
+        sys.stdout.write("\rwaiting... {} (Time: {}:{}{})".format(
+            loading[index % len(loading)],
+            math.floor(elapsed_seconds) // 60,
+            "0" if math.floor(elapsed_seconds) % 60 < 10 else "",
+            math.floor(elapsed_seconds) % 60
+        ))
+        sys.stdout.flush()
+        time.sleep(.5)
+        elapsed_seconds += .5
+        index += 1
+        if stop_event.is_set():
+            break
 
 
-def print_loading_animation(i):
-    if i == -1:
-        return
+def process_response(data, task_dir):
+    result_dir = task_dir + '/result'
+    filepath = result_dir + '/result.zip'
 
-    loading = "|/-\\"
-    time_in_seconds = i // 2
-    sys.stdout.write("\rwaiting... {} (Time: {}:{}{})".format(
-        loading[i % len(loading)],
-        time_in_seconds // 60,
-        "0" if time_in_seconds % 60 < 10 else "",
-        time_in_seconds % 60
-    ))
-    sys.stdout.flush()
+    os.mkdir(result_dir)
+    deserialize(data, filepath)
+    unpack(origin=filepath, destination=result_dir)
+    os.remove(filepath)
+
+    return result_dir
 
 
 def main():
-    forward_port(HOST, PORT, vnc_user, ip_address)
-    setup(HOST, PORT)
+    try:
+        client_config = load_client_config_from_toml(Path("docs/default_client_config.toml"))
+        client_config.queue_user = sys.argv[1]
+        client_config.upload_data_folder = sys.argv[2]
+        try:
+            client_config.download_data_folder = sys.argv[3]
+        except IndexError:
+            client_config.download_data_folder = None
+
+        client = Client(client_config)
+        client.build(client_config.upload_data_folder, client_config.download_data_folder)
+
+    except Exception as e:
+        logging.error(f'Something went wrong: {e}')
 
 
 if __name__ == '__main__':

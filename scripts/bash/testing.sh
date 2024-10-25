@@ -5,9 +5,6 @@
 # $4 result output folder
 # $5 filepath to constraints
 
-# Create or append to the error log
-echo "testing.sh Error Log" > error.log
-
 # Create output directory
 mkdir -p "$4"/output >> error.log
 

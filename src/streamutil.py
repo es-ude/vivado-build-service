@@ -1,28 +1,28 @@
-from . import config
-delimiter = config['Connection']['delimiter'].encode()
-
-
-def find_delimiter_index(stream):
+def find_delimiter_index(stream, delimiter: bytes):
     for i in range(len(stream)):
         if stream[i:i+len(delimiter)] == delimiter:
             return i
         
 
-def end_reached(stream):
+def end_reached(stream, delimiter: bytes):
     return stream[-len(delimiter):] == delimiter
 
 
-def remove_delimiter(data):
+def remove_delimiter(data, delimiter: bytes):
     return data[:-len(delimiter)]
 
 
-def get_username(stream):
-    return stream[:find_delimiter_index(stream)].decode()
+def get_argument(stream, delimiter: bytes):
+    return stream[:find_delimiter_index(stream, delimiter)].decode()
 
 
-def get_data(stream):
-    return stream[find_delimiter_index(stream) + len(delimiter):]
+def get_data(stream, delimiter: bytes):
+    return stream[find_delimiter_index(stream, delimiter) + len(delimiter):]
 
 
-def split_stream(stream):
-    return [get_username(stream), get_data(stream)]
+def split_stream(stream, delimiter: bytes):
+    return [get_argument(stream, delimiter), get_data(stream, delimiter)]
+
+
+def join_streams(streams: list[bytes], delimiter: bytes):
+    return delimiter.join(streams) + delimiter

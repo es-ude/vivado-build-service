@@ -1,58 +1,8 @@
-from . import config
+from pathlib import Path
 from zipfile import ZipFile
 import zipfile
 import shutil
 import os
-
-send_dir = config['Paths']['send']
-receive_dir = config['Paths']['receive']
-request_file = config['Paths']['request']
-bash_script = config['Paths']['bash_script']
-test_packet = config['Test']['test_packet']
-
-send_file = os.path.join(send_dir, request_file)
-
-
-def prepare_request(directories, user):  # Client
-    file_list = []
-
-    for directory in directories:
-        file_list += get_filepaths(directory)
-
-    task_dir = make_personal_dir(user, send_dir)
-    filepath = '/'.join([task_dir, request_file])
-    pack(file_list, filepath)
-
-    return serialize(filepath), task_dir
-
-
-def process_response(data, task_dir):
-    result_dir = task_dir + '/result'
-    filepath = result_dir + '/result.zip'
-
-    os.mkdir(result_dir)
-    deserialize(data, filepath)
-    unpack(filepath, result_dir)
-    os.remove(filepath)
-
-
-def process_request(data, user):  # Server
-    task_dir = make_personal_dir(user, receive_dir)
-    filepath = '/'.join([task_dir, request_file])
-
-    deserialize(data, filepath)
-    unpack(filepath, task_dir)
-    os.remove(filepath)
-
-    return task_dir
-
-
-def prepare_response(result_directory):
-    files = get_filepaths(result_directory)
-    filepath = '/'.join([result_directory, 'result.zip'])
-    pack(files, filepath)
-
-    return serialize(filepath)
 
 
 def make_personal_dir(user, directory):
@@ -94,23 +44,18 @@ def deserialize(stream, destination):
         file.write(stream)
 
 
-def pack(origin, destination):
+def pack(base_folder, origin, destination):
     with ZipFile(destination, 'w', zipfile.ZIP_DEFLATED) as archive:
         for filepath in origin:
-            if test_packet in filepath:
-                relative_path = os.path.relpath(filepath, os.path.abspath(test_packet))
-            else:
-                relative_path = os.path.relpath(filepath, destination)
-            archive.write(filepath, relative_path)
+            relative_path = filepath.replace(base_folder,'')
+            archive.write(filepath, arcname=relative_path)
 
 
 def unpack(origin, destination):
-    print("\n Files located under '{}'".format(os.path.abspath(destination)))
+    print("\n Files located under '{}'\n".format(os.path.abspath(destination)))
     with ZipFile(origin, 'r') as archive:
         for file in archive.filelist:
             archive.extract(file, destination)
-
-    print("done unzipping")
 
 
 def clear(directory):
@@ -125,23 +70,6 @@ def clear(directory):
         for _dir in dirs:
             shutil.rmtree(os.path.join(root, _dir))
             print("Removed directory '{}'".format(_dir))
-
-
-def reset():
-    clear(send_dir)
-    clear(receive_dir)
-
-
-def reset_test():
-    test_dir_client = os.path.join(send_dir, 'test')
-    test_dir_server = os.path.join(receive_dir, 'test')
-
-    if os.path.isdir(test_dir_client) and os.path.isdir(test_dir_server):
-        clear(test_dir_client)
-        clear(test_dir_server)
-
-        os.rmdir(test_dir_client)
-        os.rmdir(test_dir_server)
 
 
 def remove(directory):
