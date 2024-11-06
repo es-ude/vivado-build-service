@@ -18,6 +18,7 @@
 /tests/testing-environment/tmp/client/*
 !tests/testing-environment/tmp/client/info.md
 
+/tests/download/*
 /tests/test_packet/*
 
 *.pyc
