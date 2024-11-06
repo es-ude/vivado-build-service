@@ -104,7 +104,7 @@ def execute(task, server_config: ServerConfig, event):
         result_dir,
         server_config.constraints
     ]
-    logging.info(":Server:Running Bash Script\n")
+    logging.info(":Server: Running Bash Script\n")
     _run_bash_script(server_config.bash_script, bash_arguments)
 
     # Insert data in (rudimentary) DB - This part is not yet implemented
@@ -125,9 +125,9 @@ def _run_bash_script(bash_script: str, bash_arguments: list[str]):
                        stdout=None, stderr=None, check=True)
     #                   capture_output=True, text=True, check=True)
     except subprocess.CalledProcessError as e:
-        logging.error(f"Something went wrong while executing bash script (Error Code: {e.returncode})\n{e.stderr}")
+        logging.error(f":Server: Something went wrong while executing bash script (Error Code: {e.returncode})\n{e.stderr}")
     except Exception as e:
-        logging.error(f"Something went wrong while executing bash script:\n{e}")
+        logging.error(f":Server: Something went wrong while executing bash script:\n{e}")
 
 
 def _delete_report_lines_in_dir(directory: str):

@@ -1,6 +1,19 @@
 import time
 
 
+class Task:
+    def __init__(self, user: str, job_id):
+        self._user = user
+        self._job_id = job_id
+
+    def get_path(self):
+        return f"{self._user}/{self._job_id}"
+
+    @property
+    def user(self):
+        return self._user
+
+
 class UserQueue:
     def __init__(self):
         self.user_queues = {}

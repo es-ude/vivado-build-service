@@ -72,7 +72,9 @@ class Test(TestCase):
 
         if self.server is not None:
             self.server.stop()
+
         reset_testing_environment(self.testing_environment, self.download_directory)
+
 
 """
         try:
