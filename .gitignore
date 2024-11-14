@@ -1,13 +1,13 @@
 # Default ignored files
 /shelf/
 /workspace.xml
-/docs/config.toml
+/config/config.toml
 /venv/
 /.idea/
 /.vscode/
 
-/docs/client_config.toml
-/docs/server_config.toml
+/config/client_config.toml
+/config/server_config.toml
 
 /tmp/server/*
 !tmp/server/info.md
