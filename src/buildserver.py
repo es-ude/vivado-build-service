@@ -1,18 +1,16 @@
-import subprocess
+import os
 import sys
+import logging
+import threading
+import subprocess
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 
 import tomli
 
-from src.config import ServerConfig, GeneralConfig, default_general_config
 from src.user_queue import UserQueue
-
-from concurrent.futures import ThreadPoolExecutor
-import threading
-import logging
-import os
-
 from src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
+from src.config import ServerConfig, GeneralConfig, default_general_config
 
 logging.getLogger().setLevel(logging.INFO)
 

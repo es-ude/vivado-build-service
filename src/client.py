@@ -1,23 +1,22 @@
+import os
+import sys
 import math
-import shutil
-import threading
 import time
+import socket
+import select
+import logging
+import threading
+import subprocess
+from pathlib import Path
+from typing import Tuple
+from contextlib import closing
 from distutils.dir_util import copy_tree
+
+import tomli
 
 from src.config import ClientConfig, GeneralConfig, default_general_config
 from src.filehandler import make_personal_dir, get_filepaths, serialize, pack, unpack, deserialize
 from src.streamutil import join_streams
-
-from contextlib import closing
-from pathlib import Path
-from typing import Tuple
-import os
-import tomli
-import subprocess
-import logging
-import socket
-import select
-import sys
 
 logging.getLogger().setLevel(logging.INFO)
 
