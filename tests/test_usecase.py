@@ -1,11 +1,10 @@
 import os
 import shutil
-import sys
 import threading
 import time
 
-from buildserver import BuildServer
-from client import Client
+from src.buildserver import BuildServer
+from src.client import Client
 from src.config import ClientConfig, ServerConfig
 
 from unittest import TestCase

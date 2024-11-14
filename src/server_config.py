@@ -14,4 +14,3 @@ class ServerConfig:
     ssh_username: str
     num_workers: int = 12
     isTest: bool = False
-

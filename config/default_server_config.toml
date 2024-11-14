@@ -1,8 +1,8 @@
 #   Configure your program here and
 #   rename this file to 'server_config.toml' for changes to apply.
 [server]
-vivado_user = '{your vivado profile username}'
-port = '{server port}'
+vivado_user = '{Your Server Vivado User Profile}'
+port = '{Your Server Port}'
 
 [paths]
 receive_folder = 'tmp/server'

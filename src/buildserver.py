@@ -144,7 +144,7 @@ def _delete_report_lines_in_dir(directory: str):
 
 
 def main():
-    server_config = load_server_config_from_toml(Path("docs/default_server_config.toml"))
+    server_config = load_server_config_from_toml(Path("../config/default_server_config.toml"))
     server = BuildServer(server_config)
     server.start()
 

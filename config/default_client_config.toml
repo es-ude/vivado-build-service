@@ -1,14 +1,14 @@
 #   Configure your program here and
 #   rename this file to 'client_config.toml' for changes to apply.
-queue_user = 'dominik'
+queue_user = '{Your Username}'
 
 #   [server]: 'username' and [server]: 'ip address' must be configured in order to function
 #   'vivado_user' is the name of the user profile for vivado synthesis on your server.
 #   'ip address' is the ip address of your server.
 [server]
-vivado_user = 'dominik'
-ip_address = '65.108.38.237'
-port = '2025'
+vivado_user = '{Your Server Vivado User Profile}'
+ip_address = '{Your Server IP Address}'
+port = '{Your Server Port}'
 
 [paths]
 send_dir = 'tmp/client'
