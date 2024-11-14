@@ -6,6 +6,9 @@
 /.idea/
 /.vscode/
 
+/docs/client_config.toml
+/docs/server_config.toml
+
 /tmp/server/*
 !tmp/server/info.md
 
