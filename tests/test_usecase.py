@@ -1,6 +1,7 @@
 import os
 import shutil
 import threading
+import filecmp
 import time
 
 from src.buildserver import BuildServer
@@ -56,26 +57,6 @@ class Test(TestCase):
         self.server_thread = threading.Thread(target=threaded_server, args=(self.server,))
         self.client_thread = threading.Thread(target=threaded_client, args=(self.client,))
 
-        # try
-        self.server_thread.start()
-        self.client_thread.start()
-
-        wait_until_files_are_downloaded(self.download_directory, timeout_in_seconds=10)
-
-        task_directory_exists = self.client.task_dir is not None
-        self.assertTrue(task_directory_exists, "Task directory does not exist")
-
-        self.assertTrue(
-            expr=compare_directories(dir1=self.client.task_dir, dir2=self.download_directory),
-            msg="Files are not equal")
-
-        if self.server is not None:
-            self.server.stop()
-
-        reset_testing_environment(self.testing_environment, self.download_directory)
-
-
-"""
         try:
             self.server_thread.start()
             self.client_thread.start()
@@ -85,9 +66,7 @@ class Test(TestCase):
             task_directory_exists = self.client.task_dir is not None
             self.assertTrue(task_directory_exists, "Task directory does not exist")
 
-            self.assertTrue(
-                expr=compare_directories(dir1=self.client.task_dir, dir2=self.download_directory),
-                msg="Files are not equal")
+            self.compare_directories(dir1=self.client.task_dir, dir2=self.download_directory)
 
         except TimeoutError:
             self.fail("Timed out waiting for completion")
@@ -97,7 +76,23 @@ class Test(TestCase):
             if self.server is not None:
                 self.server.stop()
             reset_testing_environment(self.testing_environment, self.download_directory)
-"""
+
+    def compare_directories(self, dir1, dir2):
+        if not os.path.exists(dir1) or not os.path.exists(dir2):
+            self.fail(f"One or both directories do not exist: {dir1}, {dir2}")
+
+        if not os.path.isdir(dir1) or not os.path.isdir(dir2):
+            self.fail(f"One or both paths are not directories: {dir1}, {dir2}")
+
+        dir_comparison = filecmp.dircmp(dir1, dir2)
+
+        print(dir_comparison.diff_files)
+
+        if dir_comparison.diff_files or dir_comparison.left_only or dir_comparison.right_only:
+            self.fail(f"Directories {dir1} and {dir2} are different.")
+
+        for subdir in dir_comparison.common_dirs:
+            self.compare_directories(os.path.join(dir1, subdir), os.path.join(dir2, subdir))
 
 
 def reset_testing_environment(testing_env: list[str], download_dir: str):
@@ -116,11 +111,6 @@ def reset_testing_environment(testing_env: list[str], download_dir: str):
     for directory in testing_env:
         if os.path.exists(directory):
             os.rmdir(directory)
-
-
-def compare_directories(dir1, dir2):
-    ...
-    return True
 
 
 def wait_until_files_are_downloaded(download_directory, timeout_in_seconds: int = None):
