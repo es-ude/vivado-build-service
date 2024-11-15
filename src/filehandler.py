@@ -3,8 +3,10 @@ import shutil
 import zipfile
 from zipfile import ZipFile
 
+from src.user_queue import Task
 
-def make_personal_dir(user, directory):
+
+def make_personal_dir_and_get_task(user, directory, only_bin) -> Task:
     client_dirs = os.listdir(directory)
     client_dir = os.path.join(directory, user)
 
@@ -18,10 +20,15 @@ def make_personal_dir(user, directory):
         else:
             queue_priority = max([int(_dir) for _dir in user_dir_contents]) + 1
 
-    task_dir = os.path.join(client_dir, str(queue_priority))
-    os.mkdir(task_dir)
+    task = Task(
+        user=user,
+        job_id=queue_priority,
+        only_bin=only_bin,
+        relative_path=directory
+    )
 
-    return task_dir
+    os.mkdir(task.path())
+    return task
 
 
 def get_filepaths(directory):
