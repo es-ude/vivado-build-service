@@ -170,8 +170,8 @@ class Client:
         return result_dir
 
 
-def main():
-    client = Client.from_config(Path("../config/client_config.toml"))
+def main(config_path: Path = Path("config/client_config.toml")):
+    client = Client.from_config(config_path)
 
     client.client_config.queue_user = sys.argv[1]
     upload_data_folder = sys.argv[2]
@@ -184,4 +184,10 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+
+    if len(sys.argv) > 0:
+        config_path = Path(sys.argv[1])
+        main(config_path)
+    else:
+        main()

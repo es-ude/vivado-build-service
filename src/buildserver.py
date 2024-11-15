@@ -140,7 +140,7 @@ def _delete_report_lines_in_dir(directory: str):
                 f.truncate()
 
 
-def main(config_path: Path = Path("../config/server_config.toml")):
+def main(config_path: Path = Path("config/server_config.toml")):
     server_config = load_server_config_from_toml(config_path)
     server = BuildServer(server_config)
     server.start()
