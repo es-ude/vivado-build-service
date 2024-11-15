@@ -4,6 +4,7 @@
 # $3 task build folder
 # $4 result output folder
 # $5 filepath to constraints
+# $6 only-bin-file: 'output' all-project-files: '*'
 
 # Clear auto_build folder
 rm -rf /home/"$1"/.autobuild/*
@@ -33,7 +34,7 @@ cp /home/"$1"/.autobuild/vivado_project/project_1.runs/impl_1/*.bin /home/"$1"/.
 cp /home/"$1"/.autobuild_script/create_project_full_run.tcl /home/"$1"/.autobuild/tcl_script/
 
 # Copy output folder to result folder
-cp -r /home/"$1"/.autobuild/* "$4"
+cp -r /home/"$1"/.autobuild/"$6" "$4"
 
 # Clear auto_build folder
 rm -rf /home/"$1"/.autobuild/*
