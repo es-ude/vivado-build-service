@@ -9,12 +9,8 @@ client_config = ClientConfig(
     send_dir='../tmp/client',
 )
 
-
 client = Client(client_config)
 
-"""
-client = Client.from_config("path to config")
-"""
 client.build(
     upload_dir='../../build_dir',
     download_dir='../tests/download',

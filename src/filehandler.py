@@ -1,8 +1,7 @@
-from pathlib import Path
-from zipfile import ZipFile
-import zipfile
-import shutil
 import os
+import shutil
+import zipfile
+from zipfile import ZipFile
 
 
 def make_personal_dir(user, directory):

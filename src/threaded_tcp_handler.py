@@ -1,5 +1,5 @@
-import logging
 import os
+import logging
 import socketserver
 
 from src.filehandler import make_personal_dir, deserialize, unpack, get_filepaths, pack, serialize

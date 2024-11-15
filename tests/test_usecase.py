@@ -1,14 +1,13 @@
 import os
-import shutil
-import threading
-import filecmp
 import time
+import shutil
+import filecmp
+import threading
+from unittest import TestCase
 
 from src.buildserver import BuildServer
 from src.client import Client
 from src.config import ClientConfig, ServerConfig
-
-from unittest import TestCase
 
 
 class Test(TestCase):
