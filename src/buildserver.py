@@ -8,9 +8,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 import tomli
 
-from src.user_queue import UserQueue, Task
-from src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
-from src.config import ServerConfig, GeneralConfig, default_general_config
+from .user_queue import UserQueue, Task
+from .threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
+from .config import ServerConfig, GeneralConfig, default_general_config
 
 logging.getLogger().setLevel(logging.INFO)
 
