@@ -15,7 +15,7 @@ from distutils.dir_util import copy_tree
 import tomli
 
 from src.config import ClientConfig, GeneralConfig, default_general_config
-from src.filehandler import make_personal_dir, get_filepaths, serialize, pack, unpack, deserialize
+from src.filehandler import make_personal_dir_and_get_task, get_filepaths, serialize, pack, unpack, deserialize
 from src.streamutil import join_streams
 
 logging.getLogger().setLevel(logging.INFO)
@@ -75,7 +75,7 @@ class Client:
 
     def _prepare_request(self, upload_directory: str, user: str) -> Tuple[str, str]:
         file_list = get_filepaths(upload_directory)
-        task_dir = make_personal_dir(user, self.client_config.send_dir)
+        task_dir = make_personal_dir_and_get_task(user, self.client_config.send_dir)
         target_filepath = os.path.join(*[task_dir, self.general_config.request_file])
         pack(base_folder=upload_directory, origin=file_list, destination=target_filepath)
 

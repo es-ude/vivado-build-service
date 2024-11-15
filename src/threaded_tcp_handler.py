@@ -2,9 +2,10 @@ import os
 import logging
 import socketserver
 
-from src.filehandler import make_personal_dir, deserialize, unpack, get_filepaths, pack, serialize
+from src.user_queue import Task
 from src.config import ServerConfig, GeneralConfig
 from src.streamutil import split_stream, end_reached, remove_delimiter
+from src.filehandler import make_personal_dir_and_get_task, deserialize, unpack, get_filepaths, pack, serialize
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
@@ -26,12 +27,15 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         user_queue = self.server.user_queue
         server_config = self.server.server_config
         general_config = self.server.general_config
-        data, client_address = self.get_request(self, server_config)
-        task_directory = self.process_request(data, client_address)
+        data, client_address, only_bin = self.get_request(self, server_config)
+        task = self.process_request(data, client_address, only_bin)
+        task_directory = task.path()
         result_directory = task_directory + '/result'
         os.mkdir(result_directory)
 
-        user_queue.enqueue_task(task=task_directory)
+        # use task class:
+        user_queue.enqueue_task(task)
+
         await_task_completion(directory=result_directory + '/output')
         response = prepare_response(result_directory, task_directory)
         self.send(self, response, server_config)
@@ -49,7 +53,6 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
     def get_request(self, tcp_handler, general_config: GeneralConfig):
         data = b''
         client_address = ''
-        download = ''
         only_bin_file = True
 
         while True:
@@ -68,17 +71,18 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                 break
 
         data = remove_delimiter(data, self.server.general_config.delimiter)
-        return data, client_address
+        return data, client_address, only_bin_file
 
-    def process_request(self, data, user, ):  # Server
-        task_dir = make_personal_dir(user, self.server.server_config.receive_folder)
+    def process_request(self, data, user, only_bin) -> Task:  # Server
+        task = make_personal_dir_and_get_task(user, self.server.server_config.receive_folder, only_bin)
+        task_dir = task.path()
         filepath = '/'.join([task_dir, self.server.general_config.request_file])
 
         deserialize(data, filepath)
         unpack(filepath, task_dir)
         os.remove(filepath)
 
-        return task_dir
+        return task
 
 
 def await_task_completion(directory):

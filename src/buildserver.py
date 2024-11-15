@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import tomli
 
-from src.user_queue import UserQueue
+from src.user_queue import UserQueue, Task
 from src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
 from src.config import ServerConfig, GeneralConfig, default_general_config
 
@@ -82,32 +82,31 @@ class BuildServer:
         logging.info(":Server: Shutdown complete.")
 
 
-def execute(task, server_config: ServerConfig, event):
+def execute(task: Task, server_config: ServerConfig, event):
     if event.is_set():
         return
 
-    client_id = os.path.split(os.path.split(task)[0])[1]
-    task_id = os.path.split(task)[1]
-    result_dir = os.path.abspath(task + '/result')
-    task_path = os.path.abspath(task)
+    logging.info(":Server: Handling task for {}: Task nr. {}".format(task.user, task.job_id))
 
-    logging.info(":Server: Handling task for {}: Task nr. {}".format(client_id, task_id))
+    _delete_report_lines_in_dir(os.path.abspath(task.path()))
 
-    _delete_report_lines_in_dir(os.path.abspath(task))
+    task_path = task.abspath
+    result_dir = os.path.join(task_path, 'result')
 
     bash_arguments = [
         server_config.server_vivado_user,
         server_config.tcl_script,
         task_path,
         result_dir,
-        server_config.constraints
+        server_config.constraints,
+        task.bin_file_path
     ]
     logging.info(":Server: Running Bash Script\n")
     _run_bash_script(server_config.bash_script, bash_arguments)
 
     # Insert data in (rudimentary) DB - This part is not yet implemented
 
-    logging.info(":Server: Task done for {}: Task nr. {} \n".format(client_id, task_id))
+    logging.info(":Server: Task done for {}: Task nr. {} \n".format(task.user, task.job_id))
 
 
 def _run_bash_script(bash_script: str, bash_arguments: list[str]):
