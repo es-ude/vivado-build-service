@@ -8,9 +8,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 import tomli
 
-from .user_queue import UserQueue, Task
-from .threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
-from .config import ServerConfig, GeneralConfig, default_general_config
+from src.user_queue import UserQueue, Task
+from src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
+from src.config import ServerConfig, GeneralConfig, default_general_config
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -140,11 +140,15 @@ def _delete_report_lines_in_dir(directory: str):
                 f.truncate()
 
 
-def main():
-    server_config = load_server_config_from_toml(Path("../config/default_server_config.toml"))
+def main(config_path: Path = Path("../config/server_config.toml")):
+    server_config = load_server_config_from_toml(config_path)
     server = BuildServer(server_config)
     server.start()
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    if len(sys.argv) > 0:
+        main(sys.argv[1])
+    else:
+        main()
