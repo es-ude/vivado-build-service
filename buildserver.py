@@ -61,6 +61,7 @@ class BuildServer:
         self._server_thread.start()
         logging.info(":Server: Server is running.")
         logging.info(":Server: Waiting for connection...\n")
+        self._server_thread.join()
 
     def _run_forever(self, shutdown_event: threading.Event):
         logging.info(':Server: Starting Server Loop')
@@ -151,7 +152,6 @@ def main(config_path: Path = Path("config/server_config.toml")):
 
 
 if __name__ == '__main__':
-    import sys
     if len(sys.argv) > 1:
         config_path = Path(sys.argv[1])
         main(config_path)
