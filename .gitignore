@@ -23,6 +23,7 @@
 
 /tests/download/*
 /tests/test_packet/*
+/tests/build_dir/*
 
 *.pyc
 *.log
