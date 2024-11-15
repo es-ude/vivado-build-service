@@ -29,7 +29,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         general_config = self.server.general_config
         data, client_address, only_bin = self.get_request(self, server_config)
         task = self.process_request(data, client_address, only_bin)
-        task_directory = task.path()
+        task_directory = task.path
         result_directory = task_directory + '/result'
         os.mkdir(result_directory)
 
