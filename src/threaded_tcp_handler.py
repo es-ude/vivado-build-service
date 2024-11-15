@@ -75,7 +75,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
     def process_request(self, data, user, only_bin) -> Task:  # Server
         task = make_personal_dir_and_get_task(user, self.server.server_config.receive_folder, only_bin)
-        task_dir = task.path()
+        task_dir = task.path
         filepath = '/'.join([task_dir, self.server.general_config.request_file])
 
         deserialize(data, filepath)
