@@ -15,6 +15,7 @@ from src.config import ServerConfig, GeneralConfig, default_general_config
 logging.getLogger().setLevel(logging.INFO)
 logging.basicConfig(filename='buildserver.log', encoding='utf-8', level=logging.DEBUG)
 
+
 def load_server_config_from_toml(path: Path) -> ServerConfig:
     with open(path, 'rb') as f:
         config = tomli.load(f)
