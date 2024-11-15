@@ -58,6 +58,7 @@ class Client:
         subprocess.Popen(ssh_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
 
     def build(self, upload_dir, download_dir=None, only_bin_files=True):
+        self.only_bin = only_bin_files
         request, task_dir = self._prepare_request(upload_dir, self.client_config.queue_user)
         self.task_dir = task_dir
         data = join_streams([
@@ -75,11 +76,11 @@ class Client:
 
     def _prepare_request(self, upload_directory: str, user: str) -> Tuple[str, str]:
         file_list = get_filepaths(upload_directory)
-        task_dir = make_personal_dir_and_get_task(user, self.client_config.send_dir)
-        target_filepath = os.path.join(*[task_dir, self.general_config.request_file])
+        task = make_personal_dir_and_get_task(user, self.client_config.send_dir, self.only_bin)
+        target_filepath = os.path.join(*[task.path, self.general_config.request_file])
         pack(base_folder=upload_directory, origin=file_list, destination=target_filepath)
 
-        return serialize(target_filepath), task_dir
+        return serialize(target_filepath), task.path
 
     def _send_and_receive(self, s: socket, data):
         loading_animation = threading.Thread(target=self._print_loading_animation)

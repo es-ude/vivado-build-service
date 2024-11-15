@@ -27,7 +27,7 @@ def make_personal_dir_and_get_task(user, directory, only_bin) -> Task:
         relative_path=directory
     )
 
-    os.mkdir(task.path())
+    os.mkdir(task.path)
     return task
 
 
