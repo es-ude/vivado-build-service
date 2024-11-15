@@ -13,7 +13,7 @@ from src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
 from src.config import ServerConfig, GeneralConfig, default_general_config
 
 logging.getLogger().setLevel(logging.INFO)
-
+logging.basicConfig(filename='buildserver.log', encoding='utf-8', level=logging.DEBUG)
 
 def load_server_config_from_toml(path: Path) -> ServerConfig:
     with open(path, 'rb') as f:
@@ -149,6 +149,7 @@ def main(config_path: Path = Path("../config/server_config.toml")):
 if __name__ == '__main__':
     import sys
     if len(sys.argv) > 0:
-        main(sys.argv[1])
+        config_path = Path(sys.argv[1])
+        main(config_path)
     else:
         main()
