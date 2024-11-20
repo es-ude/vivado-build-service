@@ -5,8 +5,8 @@ import filecmp
 import threading
 from unittest import TestCase
 
-from src.buildserver import BuildServer
-from src.client import Client
+from buildserver import BuildServer
+from client import Client
 from src.config import ClientConfig, ServerConfig
 
 
