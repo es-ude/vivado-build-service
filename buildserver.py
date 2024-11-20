@@ -64,16 +64,19 @@ class BuildServer:
         self._server_thread.join()
 
     def _run_forever(self, shutdown_event: threading.Event):
-        logging.info(':Server: Starting Server Loop')
         while True:
-            logging.info(':Server: Executing Server Loop')
-
             if shutdown_event.is_set():
                 break
 
-            task = self.user_queue.dequeue_task()
+            task: Task = self.user_queue.dequeue_task()
 
             if task is not None:
+                logging.info(
+                    f"Path: {task.path}\n"
+                    f"User: {task.user}\n"
+                    f"ID: {task.job_id}\n"
+                    f"Bin: {task.bin_file_path}\n"
+                )
                 self._executor.submit(execute, task, self.server_config, shutdown_event)
 
     def stop(self):
