@@ -53,7 +53,6 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
     def get_request(self, tcp_handler, general_config: GeneralConfig):
         data = b''
         client_address = ''
-        only_bin_file = True
 
         while True:
             chunk = tcp_handler.request.recv(self.server.general_config.chunk_size)
@@ -62,7 +61,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
             if not client_address:
                 client_address, stream = split_stream(data, self.server.general_config.delimiter.encode())
                 only_bin_file, stream = split_stream(stream, self.server.general_config.delimiter.encode())
-                only_bin_file = bool(only_bin_file)
+                only_bin_file = bool(int(only_bin_file))
                 logging.info(":TCP: Receiving data from '{}' {}.\n".format(client_address, tcp_handler.client_address))
                 data = stream
 
