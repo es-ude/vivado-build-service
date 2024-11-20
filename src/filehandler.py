@@ -88,11 +88,3 @@ def create_file(file, directory):
 
     with open(filepath, 'a'):
         pass
-
-
-def dos2unix(origin, destination):
-    with open(destination, "w") as fout:
-        with open(origin, "r") as fin:
-            for line in fin:
-                line = line.replace('\r\n', '\n')
-                fout.write(line)
