@@ -13,7 +13,7 @@ from src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
 from src.config import ServerConfig, GeneralConfig, default_general_config
 
 logging.getLogger().setLevel(logging.INFO)
-logging.basicConfig(filename='buildserver.log', encoding='utf-8', level=logging.DEBUG)
+# logging.basicConfig(filename='buildserver.log', encoding='utf-8', level=logging.DEBUG)
 
 
 def load_server_config_from_toml(path: Path) -> ServerConfig:
