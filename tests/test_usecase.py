@@ -22,7 +22,7 @@ class Test(TestCase):
         server_port=server_port,
         tcl_script='scripts/tcl/create_project_full_run.tcl',
         constraints='scripts/constraints/env5_config.xdc',
-        bash_script='scripts/bash/testing.sh',
+        bash_script='scripts/bash/testing_dos.sh',
         receive_folder='tmp/server',
         num_workers=12
     )
