@@ -24,14 +24,13 @@ def delete_contents(directory):
     for root, dirs, files in os.walk(directory):
         for d in dirs:
             shutil.rmtree(os.path.join(root, d))
-            os.rmdir(os.path.join(root, d))
 
 
 def configure_bash_scripts():
     for root, dirs, files in os.walk(bash_dir):
         for file in files:
             filepath = os.path.join(root, file)
-            if file.split('_')[-1] == 'dos.sh' or file == 'testing.sh':
+            if file.split('_')[-1] == 'dos.sh':
                 unix_file = os.path.join(bash_dir, "_".join(file.split('_')[:-1])) + '_unix.sh'
                 dos2unix(filepath, unix_file)
                 grant_permissions(filepath)
