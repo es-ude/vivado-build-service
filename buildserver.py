@@ -110,6 +110,7 @@ def execute(task: Task, server_config: ServerConfig, event):
         task.bin_file_path
     ]
     logging.info(":Server: Running Bash Script\n")
+    print('running bash script')
     _run_bash_script(server_config.bash_script, bash_arguments)
 
     # Insert data in (rudimentary) DB - This part is not yet implemented
