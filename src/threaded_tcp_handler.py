@@ -2,7 +2,7 @@ import os
 import logging
 import socketserver
 
-from src.user_queue import Task
+from src.user_queue import Task, UserQueue
 from src.config import ServerConfig, GeneralConfig
 from src.streamutil import split_stream, end_reached, remove_delimiter
 from src.filehandler import make_personal_dir_and_get_task, deserialize, unpack, get_filepaths, pack, serialize
@@ -24,7 +24,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         self.server: ThreadedTCPServer = server
 
     def handle(self):
-        user_queue = self.server.user_queue
+        user_queue: UserQueue = self.server.user_queue
         server_config = self.server.server_config
         general_config = self.server.general_config
         data, client_address, only_bin = self.get_request(self, server_config)
