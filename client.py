@@ -18,11 +18,10 @@ from src.config import ClientConfig, GeneralConfig, default_general_config
 from src.filehandler import make_personal_dir_and_get_task, get_filepaths, serialize, pack, unpack, deserialize
 from src.streamutil import join_streams
 
-logging.getLogger().setLevel(logging.INFO)
-
 
 class Client:
     def __init__(self, client_config: ClientConfig, general_config: GeneralConfig = None):
+        self._logger = logging.getLogger(__name__)
         self.task_dir = None
         self.client_config = client_config
         if general_config:
@@ -93,15 +92,15 @@ class Client:
 
             for s in writable:
                 print('\n')
-                logging.info(':Client: Sending...\n')
+                self._logger.info('Sending...\n')
                 s.send(data)
-                logging.info(':Client: Sent!')
+                self._logger.info('Sent!')
                 outputs.remove(s)
 
             for s in readable:
                 chunk = s.recv(self.general_config.chunk_size)
                 if not chunk:
-                    logging.info(':Client: Closing...')
+                    self._logger.info('Closing...')
                     inputs.remove(s)
                     s.close()
                     break
@@ -109,7 +108,7 @@ class Client:
                 response += chunk
 
             for s in exceptional:
-                logging.info(':Client: Error')
+                self._logger.info('Error')
                 inputs.remove(s)
                 outputs.remove(s)
                 break
@@ -121,14 +120,14 @@ class Client:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-            logging.info(':Client: Connecting...')
+            self._logger.info('Connecting...')
             ret = s.connect_ex(("localhost", self.client_config.server_port))
 
             if ret != 0:
-                logging.info(':Client: Failed to connect!\n')
+                self._logger.info('Failed to connect!\n')
                 raise ConnectionError
 
-            logging.info(':Client: Connected!\n')
+            self._logger.info('Connected!\n')
             s.setblocking(False)
             return s
 
@@ -185,7 +184,7 @@ def main(config_path: Path = Path("config/client_config.toml")):
 
 
 if __name__ == '__main__':
-    import sys
+    logging.basicConfig(level=logging.INFO)
 
     if len(sys.argv) > 0:
         config_path = Path(sys.argv[1])
