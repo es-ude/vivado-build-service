@@ -12,9 +12,6 @@ from src.user_queue import UserQueue, Task
 from src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
 from src.config import ServerConfig, GeneralConfig, default_general_config
 
-logging.getLogger().setLevel(logging.INFO)
-# logging.basicConfig(filename='buildserver.log', encoding='utf-8', level=logging.DEBUG)
-
 
 def load_server_config_from_toml(path: Path) -> ServerConfig:
     with open(path, 'rb') as f:
@@ -31,6 +28,7 @@ def load_server_config_from_toml(path: Path) -> ServerConfig:
 
 class BuildServer:
     def __init__(self, server_config: ServerConfig, general_config: GeneralConfig = None):
+        self._logger = logging.getLogger(__name__)
         self.server_config: ServerConfig = server_config
         if general_config:
             self.general_config = general_config
@@ -48,7 +46,7 @@ class BuildServer:
 
     def start(self):
         self._server_loop_thread.start()
-        logging.info(':Server: Server loop started.')
+        self._logger.info('Server loop started.')
         self.tcp_server = ThreadedTCPServer(('localhost', self.server_config.server_port),
                                             ThreadedTCPHandler,
                                             self.user_queue,
@@ -59,8 +57,8 @@ class BuildServer:
         self._server_thread = threading.Thread(target=self.tcp_server.serve_forever)
         self._server_thread.daemon = True
         self._server_thread.start()
-        logging.info(":Server: Server is running.")
-        logging.info(":Server: Waiting for connection...\n")
+        self._logger.info("Server is running.")
+        self._logger.info("Waiting for connection...\n")
         self._server_thread.join()
 
     def _run_forever(self, shutdown_event: threading.Event):
@@ -76,20 +74,22 @@ class BuildServer:
 
     def stop(self):
         print('')
-        logging.info(":Server: Shutting down...")
+        self._logger.info("Shutting down...")
         self.tcp_server.shutdown()
         self.shutdown_event.set()
 
         self._executor.shutdown(wait=True)
 
-        logging.info(":Server: Shutdown complete.")
+        self._logger.info("Shutdown complete.")
 
 
 def execute(task: Task, server_config: ServerConfig, event):
+    logger = logging.getLogger(__name__)
+
     if event.is_set():
         return
 
-    logging.info(":Server: Handling task for {}: Task nr. {}".format(task.user, task.job_id))
+    logger.info("Handling task for {}: Task nr. {}".format(task.user, task.job_id))
 
     _delete_report_lines_in_dir(os.path.abspath(task.path))
 
@@ -105,31 +105,30 @@ def execute(task: Task, server_config: ServerConfig, event):
         server_config.constraints,
         task.bin_file_path
     ]
-    logging.info(":Server: Running Bash Script\n")
+    logger.info("Running Bash Script\n")
     print('running bash script')
     _run_bash_script(server_config.bash_script, bash_arguments)
-
-    # Insert data in (rudimentary) DB - This part is not yet implemented
-
-    logging.info(":Server: Task done for {}: Task nr. {} \n".format(task.user, task.job_id))
+    logger.info("Task done for {}: Task nr. {} \n".format(task.user, task.job_id))
 
 
 def _run_bash_script(bash_script: str, bash_arguments: list[str]):
+    logger = logging.getLogger(__name__)
     os_is_windows = sys.platform.startswith('win')
     cygwin_path = ['C:\\cygwin64\\bin\\bash.exe', '-l']
+    unix_bash_path = ['user/bin/bash', '-l']
     bash_script_path = [os.path.abspath(bash_script)]
 
     if os_is_windows:
         bash_script_path = cygwin_path + bash_script_path
-
+    else:
+        bash_script_path = unix_bash_path + bash_script_path
     try:
         subprocess.run(bash_script_path + bash_arguments,
                        stdout=None, stderr=None, check=True)
-    #                   capture_output=True, text=True, check=True)
     except subprocess.CalledProcessError as e:
-        logging.error(f":Server: Something went wrong while executing bash script (Error Code: {e.returncode})\n{e.stderr}")
+        logger.error(f"Something went wrong while executing bash script (Error Code: {e.returncode})\n{e.stderr}")
     except Exception as e:
-        logging.error(f":Server: Something went wrong while executing bash script:\n{e}")
+        logger.error(f"Something went wrong while executing bash script:\n{e}")
 
 
 def _delete_report_lines_in_dir(directory: str):
@@ -152,6 +151,11 @@ def main(config_path: Path = Path("config/server_config.toml")):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(
+        level=logging.DEBUG, force=True,
+        format="{levelname}:: {pathname}:{lineno}\n\t{message}", style="{",
+    )
+
     if len(sys.argv) > 1:
         config_path = Path(sys.argv[1])
         main(config_path)
