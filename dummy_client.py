@@ -14,5 +14,5 @@ client = Client(client_config)
 client.build(
     upload_dir='../build_dir',
     download_dir='tests/download',
-    only_bin_files=False
+    only_bin_files=True
 )
