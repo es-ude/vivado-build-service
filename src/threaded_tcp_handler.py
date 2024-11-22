@@ -48,7 +48,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
     def shutdown(self):
         self.server.shutdown()
-        logging.info(":TCP: Server Shutdown")
+        logging.info("Server Shutdown")
 
     def get_request(self, tcp_handler, general_config: GeneralConfig):
         data = b''
@@ -62,7 +62,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                 client_address, stream = split_stream(data, self.server.general_config.delimiter.encode())
                 only_bin_file, stream = split_stream(stream, self.server.general_config.delimiter.encode())
                 only_bin_file = bool(int(only_bin_file))
-                logging.info(":TCP: Receiving data from '{}' {}.\n".format(client_address, tcp_handler.client_address))
+                logging.info("Receiving data from '{}' {}.\n".format(client_address, tcp_handler.client_address))
                 data = stream
 
             if (len(chunk) < self.server.general_config.chunk_size or
