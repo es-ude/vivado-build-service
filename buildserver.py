@@ -71,12 +71,7 @@ class BuildServer:
             task: Task = self.user_queue.dequeue_task()
 
             if task is not None:
-                logging.info(
-                    f"Path: {task.path}\n"
-                    f"User: {task.user}\n"
-                    f"ID: {task.job_id}\n"
-                    f"Bin: {task.bin_file_path}\n"
-                )
+                task.print_task()
                 self._executor.submit(execute, task, self.server_config, shutdown_event)
 
     def stop(self):
@@ -96,10 +91,11 @@ def execute(task: Task, server_config: ServerConfig, event):
 
     logging.info(":Server: Handling task for {}: Task nr. {}".format(task.user, task.job_id))
 
-    _delete_report_lines_in_dir(os.path.abspath(task.path()))
+    _delete_report_lines_in_dir(os.path.abspath(task.path))
 
     task_path = task.abspath
     result_dir = os.path.join(task_path, 'result')
+    print(result_dir)
 
     bash_arguments = [
         server_config.server_vivado_user,
