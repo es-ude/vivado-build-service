@@ -9,6 +9,13 @@ class Task:
         self._only_bin = only_bin
         self._relative_path = relative_path
 
+    def print(self):
+        print(
+            f"User: {self._user}\n"
+            f"Job ID: {self._job_id}\n"
+            f"Only .bin-files: {self._only_bin}\n"
+        )
+
     @property
     def path(self):
         return os.path.join(self._relative_path, self._user, str(self._job_id))
@@ -36,9 +43,9 @@ class Task:
 class UserQueue:
     def __init__(self):
         self.user_queues = {}  # Stores tasks for each user
-        self.next_users = []  # Keeps track of the order in which users are processed
+        self.next_users = list()  # Keeps track of the order in which users are processed
 
-    def enqueue_task(self, task):
+    def enqueue_task(self, task: Task):
         # We use the task's user as the key, not extracting from the path
         client_id = task.user
         if client_id not in self.next_users:
@@ -50,7 +57,7 @@ class UserQueue:
         # Add the task to the user's queue
         self.user_queues[client_id].append(task)
 
-    def dequeue_task(self):
+    def dequeue_task(self) -> Task | None:
         if len(self.user_queues) == 0:
             # If no tasks are available, wait for a while before checking again
             time.sleep(0.1)
