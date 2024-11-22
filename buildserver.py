@@ -71,7 +71,7 @@ class BuildServer:
             task: Task = self.user_queue.dequeue_task()
 
             if task is not None:
-                task.print_task()
+                task.print()
                 self._executor.submit(execute, task, self.server_config, shutdown_event)
 
     def stop(self):
