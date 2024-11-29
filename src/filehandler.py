@@ -78,8 +78,10 @@ def clear(directory):
             print("Removed directory '{}'".format(_dir))
 
 
-def remove(directory):
-    shutil.rmtree(directory)
+def delete_directories_in(directory):
+    for root, dirs, files in os.walk(directory):
+        for d in dirs:
+            shutil.rmtree(os.path.join(root, d))
 
 
 def create_file(file, directory):
