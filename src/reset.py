@@ -1,4 +1,4 @@
-from src.filehandler import delete_directories_in, clear, move_log_and_jou_files
+import os
 
 
 def reset_environment():
@@ -11,8 +11,10 @@ def reset_environment():
 
 def main():
     reset_environment()
-    move_log_and_jou_files(origin="..", destination="log")
+    move_log_and_jou_files(origin=".", destination="log")
 
 
 if __name__ == '__main__':
+    os.chdir('..')
+    from src.filehandler import delete_directories_in, clear, move_log_and_jou_files
     main()
