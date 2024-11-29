@@ -1,6 +1,8 @@
 import os
 import shutil
 
+from src.filehandler import delete_directories_in
+
 bash_dir = 'scripts/bash'
 client_dir = 'tmp/client'
 server_dir = 'tmp/server'
@@ -20,12 +22,6 @@ def grant_permissions(f):
     os.chmod(f, new_permissions)
 
 
-def delete_contents(directory):
-    for root, dirs, files in os.walk(directory):
-        for d in dirs:
-            shutil.rmtree(os.path.join(root, d))
-
-
 def configure_bash_scripts():
     for root, dirs, files in os.walk(bash_dir):
         for file in files:
@@ -37,8 +33,8 @@ def configure_bash_scripts():
 
 
 def reset_environment():
-    delete_contents(client_dir)
-    delete_contents(server_dir)
+    delete_directories_in(client_dir)
+    delete_directories_in(server_dir)
 
 
 def main():
