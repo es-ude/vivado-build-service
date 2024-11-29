@@ -170,24 +170,55 @@ class Client:
         return result_dir
 
 
-def main(config_path: Path = Path("config/client_config.toml")):
-    client = Client.from_config(config_path)
-
-    client.client_config.queue_user = sys.argv[1]
+def parse_sys_argv(default_config_path):
+    username = sys.argv[1]
     upload_data_folder = sys.argv[2]
-    try:
-        download_data_folder = sys.argv[3]
-    except IndexError:
+
+    for arg in sys.argv[3:]:
+        if os.path.isdir(arg):
+            download_data_folder = Path(arg)
+            break
+    else:
         download_data_folder = None
 
-    client.build(upload_data_folder, download_data_folder)
+    for arg in sys.argv[3:]:
+        if arg.endswith(".toml"):
+            config_path = Path(arg)
+            break
+    else:
+        config_path = default_config_path
+
+    if '-b' in sys.argv:
+        only_bin_files = True
+    else:
+        only_bin_files = False
+
+    return username, upload_data_folder, download_data_folder, config_path, only_bin_files
+
+
+def main():
+    """
+    A correct call from the command line looks like this:
+        client.py {username} {upload_dir} {download_dir} {config_path} {-b}
+
+    username        User that connects to the server
+    upload_dir      Directory where the build files are located
+    download_dir    Directory where output files should be downloaded
+    config_path     Path to a client_config.toml file
+    -b              If flag is present, only bin files will be downloaded
+
+    Arguments download_dir, config_path and -b are optional.
+    """
+    logging.basicConfig(
+        level=logging.DEBUG, force=True,
+        format="{levelname}::{filename}:{lineno}:\t{message}", style="{",
+    )
+    default_config = Path("config/client_config.toml")
+    username, upload_data_folder, download_data_folder, config_path, only_bin_files = parse_sys_argv(default_config)
+    client = Client.from_config(config_path)
+    client.client_config.queue_user = username
+    client.build(upload_data_folder, download_data_folder, only_bin_files)
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-
-    if len(sys.argv) > 0:
-        config_path = Path(sys.argv[1])
-        main(config_path)
-    else:
-        main()
+    main()
