@@ -1,6 +1,6 @@
 import os
 import time
-import shutil
+import logging
 import filecmp
 import threading
 from unittest import TestCase
@@ -12,6 +12,11 @@ from src.filehandler import delete_directories_in, clear
 
 
 class Test(TestCase):
+    logging.basicConfig(
+        level=logging.DEBUG, force=True,
+        format="{levelname}::{filename}:{lineno}:\t{message}", style="{",
+    )
+
     download_directory = 'tests/download'
     receive_directory = 'tests/testing-environment/tmp/server'
     send_directory = 'tests/testing-environment/tmp/client'
