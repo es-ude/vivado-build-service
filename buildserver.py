@@ -115,7 +115,7 @@ def _run_bash_script(bash_script: str, bash_arguments: list[str]):
     logger = logging.getLogger(__name__)
     os_is_windows = sys.platform.startswith('win')
     cygwin_path = ['C:\\cygwin64\\bin\\bash.exe', '-l']
-    unix_bash_path = ['user/bin/bash', '-l']
+    unix_bash_path = ['bin/bash', '-l']
     bash_script_path = [os.path.abspath(bash_script)]
 
     if os_is_windows:
