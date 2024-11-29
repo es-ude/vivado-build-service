@@ -184,9 +184,12 @@ def main(config_path: Path = Path("config/client_config.toml")):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(
+        level=logging.DEBUG, force=True,
+        format="{levelname}::{filename}:{lineno}:\t{message}", style="{",
+    )
 
-    if len(sys.argv) > 0:
+    if len(sys.argv) > 1:
         config_path = Path(sys.argv[1])
         main(config_path)
     else:
