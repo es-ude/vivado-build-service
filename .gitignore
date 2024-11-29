@@ -1,3 +1,21 @@
+# Server/Client messaging
+/tmp/server/*
+!tmp/server/info.md
+/tmp/client/*
+!tmp/client/info.md
+
+# Testing environment messaging
+/tests/testing-environment/tmp/server/*
+!tests/testing-environment/tmp/server/info.md
+/tests/testing-environment/tmp/client/*
+!tests/testing-environment/tmp/client/info.md
+/tests/download/*
+/tests/build_dir/*
+
+# Specific configurations
+/config/client_config.toml
+/config/server_config.toml
+
 # Default ignored files
 /shelf/
 /workspace.xml
@@ -5,26 +23,6 @@
 /venv/
 /.idea/
 /.vscode/
-
-/config/client_config.toml
-/config/server_config.toml
-
-/tmp/server/*
-!tmp/server/info.md
-
-/tmp/client/*
-!tmp/client/info.md
-
-/tests/testing-environment/tmp/server/*
-!tests/testing-environment/tmp/server/info.md
-
-/tests/testing-environment/tmp/client/*
-!tests/testing-environment/tmp/client/info.md
-
-/tests/download/*
-/tests/test_packet/*
-/tests/build_dir/*
-
 *.pyc
 *.log
 
@@ -34,6 +32,3 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
-
-# Temporary
-/scripts/tcl/tcl_script.py
