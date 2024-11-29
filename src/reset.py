@@ -17,11 +17,11 @@ def clear(directory):
 
 
 def reset_environment():
-    delete_directories_in("../tmp/client")
-    delete_directories_in("../tmp/server")
-    delete_directories_in("../tests/testing-environment/tmp/client")
-    delete_directories_in("../tests/testing-environment/tmp/server")
-    clear("../tests/download")
+    delete_directories_in("tmp/client")
+    delete_directories_in("tmp/server")
+    delete_directories_in("tests/testing-environment/tmp/client")
+    delete_directories_in("tests/testing-environment/tmp/server")
+    clear("tests/download")
 
 
 def move_log_and_jou_files(origin, destination):
@@ -36,7 +36,7 @@ def move_log_and_jou_files(origin, destination):
 
 def main():
     reset_environment()
-    move_log_and_jou_files(origin="..", destination="log")
+    move_log_and_jou_files(origin=".", destination="log")
 
 
 if __name__ == '__main__':
