@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 import tomli
 
 from src.user_queue import UserQueue, Task
+from src.reset import move_log_and_jou_files
 from src.filehandler import configure_bash_scripts
 from src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
 from src.config import ServerConfig, GeneralConfig, default_general_config
@@ -86,6 +87,7 @@ def execute(task: Task, server_config: ServerConfig, event):
     ]
     logger.info("Running Bash Script\n")
     _run_bash_script(server_config.bash_script, bash_arguments)
+    move_log_and_jou_files(origin=".", destination="log")
     logger.info("Task done for {}: Task nr. {} \n".format(task.user, task.job_id))
 
 
