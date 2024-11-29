@@ -114,14 +114,3 @@ def configure_bash_scripts(bash_dir):
                 unix_file = os.path.join(bash_dir, "_".join(file.split('_')[:-1])) + '_unix.sh'
                 dos2unix(filepath, unix_file)
                 grant_permissions(filepath)
-
-
-def move_log_and_jou_files(origin, destination):
-    parent_dir = os.path.abspath(os.path.join(os.getcwd(), origin))
-    log_dir = os.path.join(parent_dir, destination)
-
-    for filename in os.listdir(parent_dir):
-        if filename.endswith('.log') or filename.endswith('.jou'):
-            file_path = os.path.join(parent_dir, filename)
-            destination_path = os.path.join(log_dir, filename)
-            shutil.move(file_path, destination_path)
