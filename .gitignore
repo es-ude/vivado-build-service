@@ -6,18 +6,18 @@
 /.idea/
 /.vscode/
 
+
 /config/client_config.toml
 /config/server_config.toml
 
+# Server/Client Messages
 /tmp/server/*
 !tmp/server/info.md
-
 /tmp/client/*
 !tmp/client/info.md
 
 /tests/testing-environment/tmp/server/*
 !tests/testing-environment/tmp/server/info.md
-
 /tests/testing-environment/tmp/client/*
 !tests/testing-environment/tmp/client/info.md
 
