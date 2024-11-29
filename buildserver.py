@@ -153,7 +153,7 @@ def main(config_path: Path = Path("config/server_config.toml")):
 if __name__ == '__main__':
     logging.basicConfig(
         level=logging.DEBUG, force=True,
-        format="{levelname}:: {pathname}:{lineno}\n\t{message}", style="{",
+        format="{levelname}::{filename}:{lineno}:\t{message}", style="{",
     )
 
     if len(sys.argv) > 1:
