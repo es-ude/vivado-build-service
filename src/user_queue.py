@@ -4,9 +4,10 @@ import queue
 
 
 class Task:
-    def __init__(self, user: str, job_id: int, relative_path: str, only_bin: bool = True):
+    def __init__(self, user: str, job_id: int, relative_path: str, model_number: str, only_bin: bool = True):
         self._user = user
         self._job_id = job_id
+        self._model_number = model_number
         self._only_bin = only_bin
         self._relative_path = relative_path
 
@@ -14,6 +15,7 @@ class Task:
         print(
             f"User: {self._user}\n"
             f"Job ID: {self._job_id}\n"
+            f"Model Number: {self._model_number}\n"
             f"Only .bin-files: {self._only_bin}\n"
         )
 
@@ -32,6 +34,10 @@ class Task:
     @property
     def job_id(self):
         return self._job_id
+
+    @property
+    def model_number(self):
+        return self._model_number
 
     @property
     def bin_file_path(self):

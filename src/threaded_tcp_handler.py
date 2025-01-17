@@ -27,8 +27,8 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         user_queue: UserQueue = self.server.user_queue
         server_config = self.server.server_config
         general_config = self.server.general_config
-        data, client_address, only_bin = self.get_request(self, server_config)
-        task = self.process_request(data, client_address, only_bin)
+        data, client_address, model_number, only_bin = self.get_request(self, server_config)
+        task = self.process_request(data, client_address, model_number, only_bin)
         task_directory = task.path
         result_directory = task_directory + '/result'
         os.mkdir(result_directory)
@@ -60,6 +60,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
             if not client_address:
                 client_address, stream = split_stream(data, self.server.general_config.delimiter.encode())
+                model_number, stream = split_stream(data, self.server.general_config.delimiter.encode())
                 only_bin_file, stream = split_stream(stream, self.server.general_config.delimiter.encode())
                 only_bin_file = bool(int(only_bin_file))
                 logging.info("Receiving data from '{}' {}.\n".format(client_address, tcp_handler.client_address))
@@ -70,15 +71,18 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
                 break
 
         data = remove_delimiter(data, self.server.general_config.delimiter)
-        return data, client_address, only_bin_file
+        return data, client_address, model_number, only_bin_file
 
-    def process_request(self, data, user, only_bin) -> Task:  # Server
-        task = make_personal_dir_and_get_task(user, self.server.server_config.receive_folder, only_bin)
+    def process_request(self, data, user, model_number, only_bin) -> Task:  # Server
+        task = make_personal_dir_and_get_task(user, self.server.server_config.receive_folder, model_number, only_bin)
         task_dir = task.path
         filepath = '/'.join([task_dir, self.server.general_config.request_file])
 
         deserialize(data, filepath)
-        unpack(filepath, task_dir)
+
+        status = unpack(filepath, task_dir)
+        logging.info(status)
+
         os.remove(filepath)
 
         return task

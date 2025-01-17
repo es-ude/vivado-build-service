@@ -45,23 +45,13 @@ class Client:
         )
         return cls(config)
 
-    def _forward_port(self):
-        ssh_command = "ssh -Y -L {}:{}:{} {}@{}".format(
-            self.client_config.server_port,
-            'localhost',
-            self.client_config.server_port,
-            self.client_config.server_vivado_user,
-            self.client_config.server_ip_address
-        )
-        print(ssh_command)
-        subprocess.Popen(ssh_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
-
-    def build(self, upload_dir, download_dir=None, only_bin_files=True):
+    def build(self, upload_dir, model_number, download_dir=None, only_bin_files=True):
         self.only_bin = only_bin_files
         request, task_dir = self._prepare_request(upload_dir, self.client_config.queue_user)
         self.task_dir = task_dir
         data = join_streams([
                 self.client_config.queue_user.encode(),
+                model_number.encode(),
                 str(int(only_bin_files)).encode(),
                 request
         ], self.general_config.delimiter.encode())
@@ -72,6 +62,16 @@ class Client:
             copy_tree(src=result_dir, dst=download_dir)
         self.stop_loading_animation_event.set()
         s.close()
+
+    def _forward_port(self):
+        ssh_command = "ssh -Y -L {}:{}:{} {}@{}".format(
+            self.client_config.server_port,
+            'localhost',
+            self.client_config.server_port,
+            self.client_config.server_vivado_user,
+            self.client_config.server_ip_address
+        )
+        subprocess.Popen(ssh_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
 
     def _prepare_request(self, upload_directory: str, user: str) -> Tuple[str, str]:
         file_list = get_filepaths(upload_directory)
@@ -91,7 +91,6 @@ class Client:
             readable, writable, exceptional = select.select(inputs, outputs, inputs, 0.5)
 
             for s in writable:
-                print('\n')
                 self._logger.info('Sending...\n')
                 s.send(data)
                 self._logger.info('Sent!')
@@ -124,10 +123,10 @@ class Client:
             ret = s.connect_ex(("localhost", self.client_config.server_port))
 
             if ret != 0:
-                self._logger.info('Failed to connect!\n')
+                self._logger.info('Failed to connect!\n\n')
                 raise ConnectionError
 
-            self._logger.info('Connected!\n')
+            self._logger.info('Connected!\n\n')
             s.setblocking(False)
             return s
 
@@ -164,7 +163,10 @@ class Client:
 
         os.mkdir(result_dir)
         deserialize(data, filepath)
-        unpack(origin=filepath, destination=result_dir)
+
+        status = unpack(origin=filepath, destination=result_dir)
+        self._logger.info(status)
+
         os.remove(filepath)
 
         return result_dir
