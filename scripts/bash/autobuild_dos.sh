@@ -4,7 +4,9 @@
 # $3 task build folder
 # $4 result output folder
 # $5 filepath to constraints
-# $6 only-bin-file: 'output' all-project-files: '*'
+# $6 only bin file => 'output'
+#    all project files => '*'
+# $7 tcl arguments
 
 LOG_FILE="run.log"
 
@@ -30,7 +32,7 @@ cp -r "$3" /home/"$1"/.autobuild/input_srcs/srcs 2>> "$LOG_FILE"
 
 log_message "Running Vivado..."
 export XILINXD_LICENSE_FILE=/opt/flexlm/Xilinx.lic
-/tools/Xilinx/Vivado/2021.1/bin/vivado -mode tcl -source "$2" >> "$LOG_FILE" 2>&1
+/tools/Xilinx/Vivado/2021.1/bin/vivado -mode tcl -source "$2" -tclargs "$7" >> "$LOG_FILE" 2>&1
 
 if [ $? -ne 0 ]; then
     log_message "Vivado run failed. Please check the log for errors."
