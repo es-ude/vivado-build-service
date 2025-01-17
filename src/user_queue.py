@@ -1,5 +1,6 @@
 import os
 import time
+import queue
 
 
 class Task:
@@ -43,30 +44,29 @@ class Task:
 class UserQueue:
     def __init__(self):
         self.user_queues = {}
-        self.next_users = list()
+        self.next_users = queue.Queue()
 
     def enqueue_task(self, task: Task):
         client_id = task.user
-        if client_id not in self.next_users:
-            self.next_users.append(client_id)
 
         if client_id not in self.user_queues:
-            self.user_queues[client_id] = []
+            self.user_queues[client_id] = queue.Queue()
+            self.next_users.put(client_id)
 
-        self.user_queues[client_id].append(task)
+        self.user_queues[client_id].put(task)
 
     def dequeue_task(self) -> Task | None:
-        if len(self.user_queues) == 0:
-            time.sleep(0.1)
-            return None
+        if not self.next_users.empty():
+            next_user = self.next_users.get()
 
-        next_user = self.next_users.pop(0)
+            if not self.user_queues[next_user].empty():
+                task = self.user_queues[next_user].get()
 
-        task = self.user_queues[next_user].pop(0)
+                if self.user_queues[next_user].empty():
+                    del self.user_queues[next_user]
+                else:
+                    self.next_users.put(next_user)
 
-        if len(self.user_queues[next_user]) == 0:
-            del self.user_queues[next_user]
-        else:
-            self.next_users.append(next_user)
-
-        return task
+                return task
+        time.sleep(0.1)
+        return None
