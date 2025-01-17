@@ -107,8 +107,6 @@ def _run_bash_script(bash_script: str, bash_arguments: list[str]):
                        stdout=None, stderr=None, check=True)
     except subprocess.CalledProcessError as e:
         logger.error(f"Something went wrong while executing bash script (Error Code: {e.returncode})\n{e.stderr}")
-    except Exception as e:
-        logger.error(f"Something went wrong while executing bash script:\n{e}")
 
 
 def _delete_report_lines_in_dir(directory: str):
