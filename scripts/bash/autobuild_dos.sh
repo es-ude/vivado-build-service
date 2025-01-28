@@ -11,7 +11,7 @@
 LOG_FILE="run.log"
 
 log_message() {
-    echo "$(date '+%d.%m.%Y %H:%M') - $1" >> "$LOG_FILE"
+    echo "$(date '+%d.%m.%Y %H:%M') - $1" > "$LOG_FILE"
 }
 
 log_message "Clearing auto_build folder..."
