@@ -59,7 +59,7 @@ def pack(base_folder, origin, destination):
 
 
 def unpack(origin, destination) -> str:
-    status = "\n Files located under '{}'\n".format(os.path.abspath(destination))
+    status = "Files located under '{}'\n".format(os.path.abspath(destination))
     with ZipFile(origin, 'r') as archive:
         for file in archive.filelist:
             archive.extract(file, destination)
