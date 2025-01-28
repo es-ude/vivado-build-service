@@ -74,7 +74,7 @@ def execute(task: Task, server_config: ServerConfig, event):
         return
 
     logger.info("Handling task for {}: Task nr. {}".format(task.user, task.job_id))
-    _delete_report_lines_in_dir(os.path.abspath(task.path))
+    delete_report_lines_in_dir(os.path.abspath(task.path))
     task_path = task.abspath
     result_dir = os.path.join(task_path, 'result')
     bash_arguments = [
@@ -83,11 +83,11 @@ def execute(task: Task, server_config: ServerConfig, event):
         task_path,
         result_dir,
         server_config.constraints,
-        task.bin_file_path
+        task.bin_file_path,
+        task.model_number
     ]
     logger.info("Running Bash Script\n")
-    line = '\n\t'
-    logger.info(f"Bash Arguments:{line.join(bash_arguments)}")
+    logger.info(get_bash_arguments_debug_message(bash_arguments))
 
     _run_bash_script(server_config.bash_script, bash_arguments)
     move_log_and_jou_files(origin=".", destination="log")
@@ -112,7 +112,20 @@ def _run_bash_script(bash_script: str, bash_arguments: list[str]):
         logger.error(f"Something went wrong while executing bash script (Error Code: {e.returncode})\n{e.stderr}")
 
 
-def _delete_report_lines_in_dir(directory: str):
+def get_bash_arguments_debug_message(bash_arguments):
+    return (
+        f"Bash Arguments:\n"
+        f"\tVivado Server Username:      {bash_arguments[0]}\n"
+        f"\tPath to .tcl script:         {bash_arguments[1]}\n"
+        f"\tPath to task:                {bash_arguments[2]}\n"
+        f"\tPath to result directory:    {bash_arguments[3]}\n"
+        f"\tPath to constraints file:    {bash_arguments[4]}\n"
+        f"\tOnly .bin modifier:          {bash_arguments[5]}\n"
+        f"\tFPGA model number:           {bash_arguments[6]}\n"
+    )
+
+
+def delete_report_lines_in_dir(directory: str):
     for (root, dirs, files) in os.walk(directory, topdown=True):
         for file in files:
             file_path = os.path.abspath(os.path.join(root, file))
