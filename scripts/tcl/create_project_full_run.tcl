@@ -1,6 +1,6 @@
 # run.tcl V2
 
-# NOTE:  typical usage would be "vivado -mode tcl -source run.tcl"
+# NOTE: typical usage would be "vivado -mode tcl -source run.tcl -part <part_number>"
 
 # Function to handle errors and exit Vivado
 proc exit_on_error {errorMsg} {
@@ -8,11 +8,17 @@ proc exit_on_error {errorMsg} {
     exit 1
 }
 
-# STEP#1: setup design sources and constraints
-create_project project_1 /home/dominik/.autobuild/vivado_project -part xc7s15ftgb196-2 -force
+# Check if a custom part number is provided via system arguments
+if {[llength $::argv] > 0} {
+    set part_number [lindex $::argv 0]
+}
+
+# STEP#1: Setup design sources and constraints
+create_project project_1 /home/dominik/.autobuild/vivado_project -part $part_number -force
 add_files /home/dominik/.autobuild/input_srcs/srcs
 add_files -fileset constrs_1 -norecurse /home/dominik/.autobuild/input_srcs/constraints/env5_config.xdc
 update_compile_order -fileset sources_1
+
 
 # STEP#2: run synthesis
 if {[catch {

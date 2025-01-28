@@ -6,7 +6,7 @@ from zipfile import ZipFile
 from src.user_queue import Task
 
 
-def make_personal_dir_and_get_task(user, directory, only_bin) -> Task:
+def make_personal_dir_and_get_task(user, directory, model_number, only_bin) -> Task:
     client_dirs = os.listdir(directory)
     client_dir = os.path.join(directory, user)
 
@@ -23,6 +23,7 @@ def make_personal_dir_and_get_task(user, directory, only_bin) -> Task:
     task = Task(
         user=user,
         job_id=queue_priority,
+        model_number=model_number,
         only_bin=only_bin,
         relative_path=directory
     )
@@ -57,11 +58,12 @@ def pack(base_folder, origin, destination):
             archive.write(filepath, arcname=relative_path)
 
 
-def unpack(origin, destination):
-    print("\n Files located under '{}'\n".format(os.path.abspath(destination)))
+def unpack(origin, destination) -> str:
+    status = "Files located under '{}'\n".format(os.path.abspath(destination))
     with ZipFile(origin, 'r') as archive:
         for file in archive.filelist:
             archive.extract(file, destination)
+    return status
 
 
 def clear(directory):

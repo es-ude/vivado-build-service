@@ -57,6 +57,7 @@ class Test(TestCase):
             c.build(
                 upload_dir='tests/build_dir',
                 download_dir=self.download_directory,
+                model_number='xc7s15ftgb196-2',
                 only_bin_files=True
             )
 
@@ -90,8 +91,6 @@ class Test(TestCase):
             self.fail(f"One or both paths are not directories: {dir1}, {dir2}")
 
         dir_comparison = filecmp.dircmp(dir1, dir2)
-
-        print(dir_comparison.diff_files)
 
         if dir_comparison.diff_files or dir_comparison.left_only or dir_comparison.right_only:
             self.fail(f"Directories {dir1} and {dir2} are different.")

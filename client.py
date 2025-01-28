@@ -45,23 +45,14 @@ class Client:
         )
         return cls(config)
 
-    def _forward_port(self):
-        ssh_command = "ssh -Y -L {}:{}:{} {}@{}".format(
-            self.client_config.server_port,
-            'localhost',
-            self.client_config.server_port,
-            self.client_config.server_vivado_user,
-            self.client_config.server_ip_address
-        )
-        print(ssh_command)
-        subprocess.Popen(ssh_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
-
-    def build(self, upload_dir, download_dir=None, only_bin_files=True):
+    def build(self, upload_dir, model_number, download_dir=None, only_bin_files=True):
         self.only_bin = only_bin_files
+        self.model_number = model_number
         request, task_dir = self._prepare_request(upload_dir, self.client_config.queue_user)
         self.task_dir = task_dir
         data = join_streams([
                 self.client_config.queue_user.encode(),
+                model_number.encode(),
                 str(int(only_bin_files)).encode(),
                 request
         ], self.general_config.delimiter.encode())
@@ -73,9 +64,19 @@ class Client:
         self.stop_loading_animation_event.set()
         s.close()
 
+    def _forward_port(self):
+        ssh_command = "ssh -Y -L {}:{}:{} {}@{}".format(
+            self.client_config.server_port,
+            'localhost',
+            self.client_config.server_port,
+            self.client_config.server_vivado_user,
+            self.client_config.server_ip_address
+        )
+        subprocess.Popen(ssh_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
+
     def _prepare_request(self, upload_directory: str, user: str) -> Tuple[str, str]:
         file_list = get_filepaths(upload_directory)
-        task = make_personal_dir_and_get_task(user, self.client_config.send_dir, self.only_bin)
+        task = make_personal_dir_and_get_task(user, self.client_config.send_dir, self.model_number, self.only_bin)
         target_filepath = os.path.join(*[task.path, self.general_config.request_file])
         pack(base_folder=upload_directory, origin=file_list, destination=target_filepath)
 
@@ -91,7 +92,6 @@ class Client:
             readable, writable, exceptional = select.select(inputs, outputs, inputs, 0.5)
 
             for s in writable:
-                print('\n')
                 self._logger.info('Sending...\n')
                 s.send(data)
                 self._logger.info('Sent!')
@@ -124,10 +124,10 @@ class Client:
             ret = s.connect_ex(("localhost", self.client_config.server_port))
 
             if ret != 0:
-                self._logger.info('Failed to connect!\n')
+                self._logger.info('Failed to connect!\n\n')
                 raise ConnectionError
 
-            self._logger.info('Connected!\n')
+            self._logger.info('Connected!\n\n')
             s.setblocking(False)
             return s
 
@@ -164,7 +164,10 @@ class Client:
 
         os.mkdir(result_dir)
         deserialize(data, filepath)
-        unpack(origin=filepath, destination=result_dir)
+
+        status = unpack(origin=filepath, destination=result_dir)
+        self._logger.info(status)
+
         os.remove(filepath)
 
         return result_dir
@@ -173,15 +176,16 @@ class Client:
 def parse_sys_argv(default_config_path):
     username = sys.argv[1]
     upload_data_folder = sys.argv[2]
+    model_number = sys.argv[3]
 
-    for arg in sys.argv[3:]:
+    for arg in sys.argv[4:]:
         if os.path.isdir(arg):
             download_data_folder = Path(arg)
             break
     else:
         download_data_folder = None
 
-    for arg in sys.argv[3:]:
+    for arg in sys.argv[4:]:
         if arg.endswith(".toml"):
             config_path = Path(arg)
             break
@@ -193,7 +197,7 @@ def parse_sys_argv(default_config_path):
     else:
         only_bin_files = False
 
-    return username, upload_data_folder, download_data_folder, config_path, only_bin_files
+    return username, upload_data_folder, model_number, download_data_folder, config_path, only_bin_files
 
 
 def main():
@@ -203,6 +207,7 @@ def main():
 
     username        User that connects to the server
     upload_dir      Directory where the build files are located
+    model_number    Model number of the FPGA that is being used
     download_dir    Directory where output files should be downloaded
     config_path     Path to a client_config.toml file
     -b              If flag is present, only bin files will be downloaded
@@ -214,10 +219,10 @@ def main():
         format="{levelname}::{filename}:{lineno}:\t{message}", style="{",
     )
     default_config = Path("config/client_config.toml")
-    username, upload_data_folder, download_data_folder, config_path, only_bin_files = parse_sys_argv(default_config)
+    username, upload_data_folder, model_number, download_data_folder, config_path, only_bin_files = parse_sys_argv(default_config)
     client = Client.from_config(config_path)
     client.client_config.queue_user = username
-    client.build(upload_data_folder, download_data_folder, only_bin_files)
+    client.build(upload_data_folder, model_number, download_data_folder, only_bin_files)
 
 
 if __name__ == '__main__':
