@@ -35,10 +35,13 @@ def make_personal_dir_and_get_task(user, directory, model_number, only_bin) -> T
 def get_filepaths(directory):
     filepaths = []
     for root, _, files in os.walk(directory):
+        print(f"Currently in directory: {root}")  # Debugging line
         for file in files:
             filepath = os.path.join(root, file)
+            print(f"Found file: {filepath}")  # Debugging line
             filepaths.append(filepath)
     return filepaths
+
 
 
 def serialize(file):

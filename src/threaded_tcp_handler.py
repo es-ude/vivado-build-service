@@ -100,7 +100,7 @@ def await_task_completion(directory):
 def prepare_response(result_directory, task_directory):
     files = get_filepaths(result_directory)
     print("xxxxxx")
-    print(files)
+    print("\n".join(files))
     new_zip = '/'.join([result_directory, 'result.zip'])
     pack(base_folder=task_directory, origin=files, destination=new_zip)
 
