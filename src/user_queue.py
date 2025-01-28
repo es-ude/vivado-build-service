@@ -13,10 +13,11 @@ class Task:
 
     def print(self):
         print(
-            f"User: {self._user}\n"
-            f"Job ID: {self._job_id}\n"
-            f"Model Number: {self._model_number}\n"
-            f"Only .bin-files: {self._only_bin}\n"
+            f"Task:\n"
+            f"\tUser: {self._user}\n"
+            f"\tJob ID: {self._job_id}\n"
+            f"\tModel Number: {self._model_number}\n"
+            f"\tOnly .bin-files: {self._only_bin}\n"
         )
 
     @property
