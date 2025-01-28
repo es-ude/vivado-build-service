@@ -114,14 +114,15 @@ def _run_bash_script(bash_script: str, bash_arguments: list[str]):
 
 def get_bash_arguments_debug_message(bash_arguments):
     return (
-        f"Bash Arguments:\n"
-        f"\tVivado Server Username:      {bash_arguments[0]}\n"
-        f"\tPath to .tcl script:         {bash_arguments[1]}\n"
-        f"\tPath to task:                {bash_arguments[2]}\n"
-        f"\tPath to result directory:    {bash_arguments[3]}\n"
-        f"\tPath to constraints file:    {bash_arguments[4]}\n"
-        f"\tOnly .bin modifier:          {bash_arguments[5]}\n"
-        f"\tFPGA model number:           {bash_arguments[6]}\n"
+        f"\n"
+        f"Bash Arguments:\n\t"
+        f"Vivado Server Username:      {bash_arguments[0]}\n\t"
+        f"Path to .tcl script:         {bash_arguments[1]}\n\t"
+        f"Path to task:                {bash_arguments[2]}\n\t"
+        f"Path to result directory:    {bash_arguments[3]}\n\t"
+        f"Path to constraints file:    {bash_arguments[4]}\n\t"
+        f"Only .bin modifier:          {bash_arguments[5]}\n\t"
+        f"FPGA model number:           {bash_arguments[6]}\n"
     )
 
 
