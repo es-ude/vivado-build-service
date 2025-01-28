@@ -86,6 +86,9 @@ def execute(task: Task, server_config: ServerConfig, event):
         task.bin_file_path
     ]
     logger.info("Running Bash Script\n")
+    line = '\n\t'
+    logger.info(f"Bash Arguments:{line.join(bash_arguments)}")
+
     _run_bash_script(server_config.bash_script, bash_arguments)
     move_log_and_jou_files(origin=".", destination="log")
     logger.info("Task done for {}: Task nr. {} \n".format(task.user, task.job_id))
