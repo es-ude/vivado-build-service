@@ -99,7 +99,9 @@ def await_task_completion(directory):
 
 def prepare_response(result_directory, task_directory):
     files = get_filepaths(result_directory)
-    filepath = '/'.join([result_directory, 'result.zip'])
-    pack(base_folder=task_directory, origin=files, destination=filepath)
+    print("xxxxxx")
+    print(files)
+    new_zip = '/'.join([result_directory, 'result.zip'])
+    pack(base_folder=task_directory, origin=files, destination=new_zip)
 
-    return serialize(filepath)
+    return serialize(new_zip)
