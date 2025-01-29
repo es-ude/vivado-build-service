@@ -1,6 +1,0 @@
-#!/bin/bash
-
-target_directory="/tmp"
-
-# Find and delete regular files with access time older than 1 day
-find "$target_directory" -type f -atime +1 -exec rm {} \;
