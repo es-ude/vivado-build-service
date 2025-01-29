@@ -21,7 +21,7 @@ log_message "Creating directories for Vivado..."
 mkdir -p /home/"$1"/.autobuild/input_srcs/srcs 2>> "$LOG_FILE"
 mkdir -p /home/"$1"/.autobuild/input_srcs/constraints 2>> "$LOG_FILE"
 mkdir -p /home/"$1"/.autobuild/vivado_project 2>> "$LOG_FILE"
-mkdir -p /home/"$1"/.autobuild/output 2>> "$LOG_FILE"
+mkdir -p /home/"$1"/.autobuild/bin 2>> "$LOG_FILE"
 mkdir -p /home/"$1"/.autobuild/tcl_script 2>> "$LOG_FILE"
 
 log_message "Copying constraints..."
