@@ -43,7 +43,7 @@ class Task:
     @property
     def bin_file_path(self):
         if self._only_bin:
-            return 'output'
+            return 'bin'
         else:
             return '*'
 

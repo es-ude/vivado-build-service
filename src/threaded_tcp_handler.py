@@ -38,7 +38,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         # use task class:
         user_queue.enqueue_task(task)
 
-        await_task_completion(directory=result_directory + '/output')
+        await_task_completion(directory=result_directory + '/bin')
         response = prepare_response(result_directory)
         self.send(self, response, server_config)
         self.request.close()

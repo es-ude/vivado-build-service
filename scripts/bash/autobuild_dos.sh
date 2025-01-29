@@ -4,7 +4,7 @@
 # $3 task build folder
 # $4 result output folder
 # $5 filepath to constraints
-# $6 only bin file => 'output'
+# $6 only bin file => 'bin'
 #    all project files => '*'
 # $7 tcl arguments
 
@@ -39,13 +39,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-log_message "Copying bin files to output folder..."
-cp /home/"$1"/.autobuild/vivado_project/project_1.runs/impl_1/*.bin /home/"$1"/.autobuild/output/ 2>> "$LOG_FILE"
+log_message "Copying bin files to bin folder..."
+cp /home/"$1"/.autobuild/vivado_project/project_1.runs/impl_1/*.bin /home/"$1"/.autobuild/bin/ 2>> "$LOG_FILE"
 
 log_message "Copying the script to the folder..."
 cp /home/"$1"/.autobuild_script/create_project_full_run.tcl /home/"$1"/.autobuild/tcl_script/ 2>> "$LOG_FILE"
 
-log_message "Copying output folder to result folder..."
+log_message "Copying bin folder or bin files to result folder..."
 # shellcheck disable=SC2086
 cp -r /home/"$1"/.autobuild/$6 "$4" 2>> "$LOG_FILE"
 
