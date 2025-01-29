@@ -57,7 +57,6 @@ class BuildServer:
                 break
             task: Task = self.user_queue.dequeue_task()
             if task is not None:
-                task.print()
                 self._executor.submit(execute, task, self.server_config, shutdown_event)
 
     def stop(self):
@@ -73,7 +72,9 @@ def execute(task: Task, server_config: ServerConfig, event):
     if event.is_set():
         return
 
-    logger.info("Handling task for {}: Task nr. {}".format(task.user, task.job_id))
+    logger.info("Handling task for {}: Task nr. {}\n".format(task.user, task.job_id))
+    task.print()
+
     delete_report_lines_in_dir(os.path.abspath(task.path))
     task_path = task.abspath
     result_dir = os.path.join(task_path, 'result')
@@ -86,11 +87,13 @@ def execute(task: Task, server_config: ServerConfig, event):
         task.bin_file_path,
         task.model_number
     ]
+
     logger.info("Running Bash Script\n")
-    logger.info(get_bash_arguments_debug_message(bash_arguments))
+    print(get_bash_arguments_debug_message(bash_arguments))
 
     _run_bash_script(server_config.bash_script, bash_arguments)
     move_log_and_jou_files(origin=".", destination="log")
+
     logger.info("Task done for {}: Task nr. {} \n".format(task.user, task.job_id))
 
 

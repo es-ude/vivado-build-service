@@ -1,5 +1,6 @@
 import os
 import logging
+import shutil
 import socketserver
 import time
 
@@ -38,7 +39,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         user_queue.enqueue_task(task)
 
         await_task_completion(directory=result_directory + '/output')
-        response = prepare_response(result_directory, task_directory)
+        response = prepare_response(result_directory)
         self.send(self, response, server_config)
         self.request.close()
 
@@ -101,9 +102,35 @@ def await_task_completion(directory):
 
 def prepare_response(result_directory, task_directory):
     files = get_filepaths(result_directory)
-    print("xxxxxx")
+    reports = get_report_file_paths(files)
+
+    logging.info("get_filepaths output:")
     print("\n".join(files))
-    new_zip = '/'.join([result_directory, 'result.zip'])
-    pack(base_folder=task_directory, origin=files, destination=new_zip)
+
+    logging.info("get_report_file_paths output:")
+    print("\n".join(reports))
+
+    reports_directory = os.path.join(task_directory, 'result', 'reports')
+    os.makedirs(reports_directory, exist_ok=True)
+
+    for report in reports:
+        shutil.copy(report, reports_directory)
+
+    new_zip = os.path.join(result_directory, 'result.zip')
+    all_files = files + [os.path.join(reports_directory, report) for report in os.listdir(reports_directory)]
+
+    pack(base_folder=result_directory, origin=all_files, destination=new_zip)
 
     return serialize(new_zip)
+
+
+def get_report_file_paths(files):
+    filepaths = []
+    for file in files:
+        if is_report(file):
+            filepaths.append(file)
+    return filepaths
+
+
+def is_report(file):
+    return ".rpt" in file and "utilization" in file or ".rpt" in file and "power" in file
