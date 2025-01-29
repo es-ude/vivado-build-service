@@ -100,7 +100,7 @@ def await_task_completion(directory):
                 return
 
 
-def prepare_response(result_directory, task_directory):
+def prepare_response(result_directory):
     files = get_filepaths(result_directory)
     reports = get_report_file_paths(files)
 
@@ -110,7 +110,7 @@ def prepare_response(result_directory, task_directory):
     logging.info("get_report_file_paths output:")
     print("\n".join(reports))
 
-    reports_directory = os.path.join(task_directory, 'result', 'reports')
+    reports_directory = os.path.join(result_directory, 'reports')
     os.makedirs(reports_directory, exist_ok=True)
 
     for report in reports:
