@@ -1,6 +1,7 @@
 import os
 import logging
 import socketserver
+import time
 
 from src.user_queue import Task, UserQueue
 from src.config import ServerConfig, GeneralConfig
@@ -94,6 +95,7 @@ def await_task_completion(directory):
             continue
         for filename in os.listdir(directory):
             if filename.endswith('.bin'):
+                time.sleep(30)
                 return
 
 
