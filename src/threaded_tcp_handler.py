@@ -133,4 +133,6 @@ def get_report_file_paths(files):
 
 
 def is_report(file):
-    return ".rpt" in file and "utilization" in file or ".rpt" in file and "power" in file
+    if '.rpt' not in file or 'clock' in file:
+        return False
+    return "utilization" in file or "power" in file
