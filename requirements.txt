@@ -1,3 +1,4 @@
-websockets==11.0.3
+toml==0.10.2
 tomli==2.0.1
+websockets==11.0.3
 vivado-report-parser==0.5.0
