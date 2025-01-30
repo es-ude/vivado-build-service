@@ -15,5 +15,5 @@ client.build(
     upload_dir='../build_dir',
     download_dir='tests/download',
     model_number='xc7s15ftgb196-2',
-    only_bin_files=True
+    only_bin_files=False
 )
