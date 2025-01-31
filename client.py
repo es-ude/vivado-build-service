@@ -17,7 +17,7 @@ import tomli
 from src.streamutil import join_streams
 from src.config import ClientConfig, GeneralConfig, default_general_config
 from src.report_parser import get_dict_from_vivado_report, get_toml_string, create_toml_from_vivado_report
-from src.filehandler import make_personal_dir_and_get_task, get_filepaths, serialize, pack, unpack, deserialize, get_report_file_paths
+from src.filehandler import make_personal_dir_and_get_task, get_filepaths, serialize, pack, unpack, deserialize, get_filename
 
 
 class Client:
@@ -61,16 +61,12 @@ class Client:
         response = self._send_and_receive(s, data)
         result_dir = self._process_response(response)
 
-        report_dir = os.path.join(result_dir, 'reports')
-        for report in os.listdir(report_dir):
-            toml_filepath = os.path.join(result_dir, 'toml', report.split('.rpt')[0] + '.toml')
-            create_toml_from_vivado_report(report, toml_filepath)
+        create_toml_reports(result_dir)
 
         if download_dir:
             copy_tree(src=result_dir, dst=download_dir)
         self.stop_loading_animation_event.set()
         s.close()
-
 
     def _forward_port(self):
         ssh_command = "ssh -Y -L {}:{}:{} {}@{}".format(
@@ -179,6 +175,20 @@ class Client:
         os.remove(filepath)
 
         return result_dir
+
+
+def create_toml_reports(result_dir):
+    report_dir = os.path.join(result_dir, 'reports')
+    toml_dir = os.path.join(result_dir, 'toml')
+    os.makedirs(toml_dir, exist_ok=True)
+
+    for root, dirs, files in os.walk(report_dir):
+        for file in files:
+            report_path = Path(root) / file
+            toml_filepath = Path(toml_dir) / (get_filename(report_path) + '.toml')
+            create_toml_from_vivado_report(report_path, toml_filepath)
+            report_dict = get_dict_from_vivado_report(report_path)
+            print(get_toml_string(report_dict))
 
 
 def parse_sys_argv(default_config_path):

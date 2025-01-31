@@ -1,6 +1,7 @@
 import os
 import shutil
 import zipfile
+from pathlib import Path
 from zipfile import ZipFile
 
 from src.user_queue import Task
@@ -130,3 +131,7 @@ def configure_bash_scripts(bash_dir):
                 unix_file = os.path.join(bash_dir, "_".join(file.split('_')[:-1])) + '_unix.sh'
                 dos2unix(filepath, unix_file)
                 grant_permissions(filepath)
+
+
+def get_filename(filepath: Path) -> str:
+    return filepath.name.split('.')[0]

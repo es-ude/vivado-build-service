@@ -96,19 +96,13 @@ def await_task_completion(directory):
             continue
         for filename in os.listdir(directory):
             if filename.endswith('.bin'):
-                time.sleep(30)
+                time.sleep(10)
                 return
 
 
 def prepare_response(result_directory):
     files = get_filepaths(result_directory)
     reports = get_report_file_paths(files)
-
-    logging.info("get_filepaths output:")
-    print("\n".join(files))
-
-    logging.info("get_report_file_paths output:")
-    print("\n".join(reports))
 
     reports_directory = os.path.join(result_directory, 'reports')
     os.makedirs(reports_directory, exist_ok=True)

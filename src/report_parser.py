@@ -18,6 +18,7 @@ def get_toml_string(d: dict) -> str:
     return toml.dumps(d)
 
 
+# todo: split in two
 def create_toml_from_vivado_report(report_filepath: Path, toml_destination_filepath: Path) -> dict:
     report_dict = get_dict_from_vivado_report(report_filepath)
     toml_string = get_toml_string(report_dict)
@@ -25,7 +26,6 @@ def create_toml_from_vivado_report(report_filepath: Path, toml_destination_filep
     os.makedirs(toml_dir, exist_ok=True)
     with open(toml_destination_filepath, "w") as f:
         f.write(toml_string)
-    return report_dict
 
 
 def main():
