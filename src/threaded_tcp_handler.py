@@ -7,7 +7,7 @@ import time
 from src.user_queue import Task, UserQueue
 from src.config import ServerConfig, GeneralConfig
 from src.streamutil import split_stream, end_reached, remove_delimiter
-from src.filehandler import make_personal_dir_and_get_task, deserialize, unpack, get_filepaths, pack, serialize
+from src.filehandler import make_personal_dir_and_get_task, deserialize, unpack, get_filepaths, pack, serialize, get_report_file_paths
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
@@ -122,17 +122,3 @@ def prepare_response(result_directory):
     pack(base_folder=result_directory, origin=all_files, destination=new_zip)
 
     return serialize(new_zip)
-
-
-def get_report_file_paths(files):
-    filepaths = []
-    for file in files:
-        if is_report(file):
-            filepaths.append(file)
-    return filepaths
-
-
-def is_report(file):
-    if '.rpt' not in file or 'clock' in file:
-        return False
-    return "utilization" in file or "power" in file

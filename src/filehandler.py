@@ -94,6 +94,20 @@ def create_file(file, directory):
         pass
 
 
+def get_report_file_paths(files) -> [str]:
+    filepaths = []
+    for file in files:
+        if is_report(file):
+            filepaths.append(file)
+    return filepaths
+
+
+def is_report(file):
+    if '.rpt' not in file or 'clock' in file:
+        return False
+    return "utilization" in file or "power" in file
+
+
 def dos2unix(origin, destination):
     with open(destination, "w") as f_out:
         with open(origin, "r") as f_in:

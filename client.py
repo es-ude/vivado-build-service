@@ -14,9 +14,10 @@ from distutils.dir_util import copy_tree
 
 import tomli
 
-from src.config import ClientConfig, GeneralConfig, default_general_config
-from src.filehandler import make_personal_dir_and_get_task, get_filepaths, serialize, pack, unpack, deserialize
 from src.streamutil import join_streams
+from src.config import ClientConfig, GeneralConfig, default_general_config
+from src.report_parser import get_dict_from_vivado_report, get_toml_string, create_toml_from_vivado_report
+from src.filehandler import make_personal_dir_and_get_task, get_filepaths, serialize, pack, unpack, deserialize, get_report_file_paths
 
 
 class Client:
@@ -59,10 +60,17 @@ class Client:
         s = self._connect_with_socket()
         response = self._send_and_receive(s, data)
         result_dir = self._process_response(response)
+
+        report_dir = os.path.join(result_dir, 'reports')
+        for report in os.listdir(report_dir):
+            toml_filepath = os.path.join(result_dir, 'toml', report.split('.rpt')[0] + '.toml')
+            create_toml_from_vivado_report(report, toml_filepath)
+
         if download_dir:
             copy_tree(src=result_dir, dst=download_dir)
         self.stop_loading_animation_event.set()
         s.close()
+
 
     def _forward_port(self):
         ssh_command = "ssh -Y -L {}:{}:{} {}@{}".format(
@@ -203,7 +211,7 @@ def parse_sys_argv(default_config_path):
 def main():
     """
     A correct call from the command line looks like this:
-        client.py {username} {upload_dir} {download_dir} {config_path} {-b}
+        client.py {username} {upload_dir} {model_number} {download_dir} {config_path} {-b}
 
     username        User that connects to the server
     upload_dir      Directory where the build files are located
