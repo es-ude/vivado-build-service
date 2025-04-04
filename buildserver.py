@@ -10,6 +10,7 @@ import tomli
 
 from src.user_queue import UserQueue, Task
 from src.reset import move_log_and_jou_files
+from src.autobuild import run_vivado_autobuild
 from src.filehandler import configure_bash_scripts
 from src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
 from src.config import ServerConfig, GeneralConfig, default_general_config
@@ -78,7 +79,9 @@ def execute(task: Task, server_config: ServerConfig, event):
     delete_report_lines_in_dir(os.path.abspath(task.path))
     task_path = task.abspath
     result_dir = os.path.join(task_path, 'result')
-    bash_arguments = [
+
+    logger.info("Running Vivado\n")
+    run_vivado_autobuild(
         server_config.server_vivado_user,
         server_config.tcl_script,
         task_path,
@@ -86,14 +89,9 @@ def execute(task: Task, server_config: ServerConfig, event):
         server_config.constraints,
         task.bin_file_path,
         task.model_number
-    ]
+    )
 
-    logger.info("Running Bash Script\n")
-    print(get_bash_arguments_debug_message(bash_arguments))
-
-    _run_bash_script(server_config.bash_script, bash_arguments)
     move_log_and_jou_files(origin=".", destination="log")
-
     logger.info("Task done for {}: Task nr. {} \n".format(task.user, task.job_id))
 
 
@@ -113,20 +111,6 @@ def _run_bash_script(bash_script: str, bash_arguments: list[str]):
                        stdout=None, stderr=None, check=True)
     except subprocess.CalledProcessError as e:
         logger.error(f"Something went wrong while executing bash script (Error Code: {e.returncode})\n{e.stderr}")
-
-
-def get_bash_arguments_debug_message(bash_arguments):
-    return (
-        f"\n"
-        f"Bash Arguments:\n\t"
-        f"Vivado Server Username:      {bash_arguments[0]}\n\t"
-        f"Path to .tcl script:         {bash_arguments[1]}\n\t"
-        f"Path to task:                {bash_arguments[2]}\n\t"
-        f"Path to result directory:    {bash_arguments[3]}\n\t"
-        f"Path to constraints file:    {bash_arguments[4]}\n\t"
-        f"Only .bin modifier:          {bash_arguments[5]}\n\t"
-        f"FPGA model number:           {bash_arguments[6]}\n"
-    )
 
 
 def delete_report_lines_in_dir(directory: str):
