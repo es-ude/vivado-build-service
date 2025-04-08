@@ -96,7 +96,8 @@ def await_task_completion(directory):
             continue
         for filename in os.listdir(directory):
             if filename.endswith('.bin'):
-                time.sleep(10)
+                print("#Task completed")
+                time.sleep(3)
                 return
 
 
