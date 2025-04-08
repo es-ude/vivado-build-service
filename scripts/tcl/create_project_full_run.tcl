@@ -14,9 +14,9 @@ if {[llength $::argv] > 0} {
 }
 
 # STEP#1: Setup design sources and constraints
-create_project project_1 /home/dominik/.autobuild/vivado_project -part $part_number -force
-add_files /home/dominik/.autobuild/input_srcs/srcs
-add_files -fileset constrs_1 -norecurse /home/dominik/.autobuild/input_srcs/constraints/env5_config.xdc
+create_project project_1 /home/vivado/.autobuild/vivado_project -part $part_number -force
+add_files /home/vivado/.autobuild/input_srcs/srcs
+add_files -fileset constrs_1 -norecurse /home/vivado/.autobuild/input_srcs/constraints/env5_config.xdc
 update_compile_order -fileset sources_1
 
 
