@@ -27,9 +27,17 @@ def run_vivado_autobuild(vivado_user, tcl_script, build_folder, result_folder, c
     ]
 
     with open(log_file, "w") as log:
-        process = subprocess.run(vivado_command, env=env, stdout=log, stderr=log)
+        try:
+            process = subprocess.run(vivado_command, env=env, stdout=log, stderr=log)
+        except Exception as e:
+            print(e)
     if process.returncode != 0:
         raise RuntimeError(f"Vivado run failed. Check log: {log_file}")
+
+    print("log file:\n")
+    with open(log_file, "r") as log:
+        for line in log:
+            print(line)
 
     bin_source = f"{autobuild_path}/vivado_project/project_1.runs/impl_1"
     for file in os.listdir(bin_source):
