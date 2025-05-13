@@ -26,11 +26,11 @@ def run_vivado_autobuild(vivado_user, tcl_script, build_folder, result_folder, c
         "/tools/Xilinx/Vivado/2021.1/bin/vivado", "-mode", "tcl", "-source", tcl_script, "-tclargs", tcl_args
     ]
 
+    err_log = os.path.join(result_folder, "failure.bin")
     with open(log_file, "w") as log:
         try:
             process = subprocess.run(vivado_command, env=env, stdout=log, stderr=log)
         except Exception as e:
-            err_log = "failure.bin"
             with open(err_log, "w") as f:
                 f.write(str(e))
             print(e)
@@ -41,7 +41,6 @@ def run_vivado_autobuild(vivado_user, tcl_script, build_folder, result_folder, c
                     shutil.copy(os.path.join(bin_source, file), f"{autobuild_path}/bin/")
                     break
             else:
-                err_log = "failure.bin"
                 with open(err_log, "w") as f:
                     f.write(str(e))
                 # raise RuntimeError(f"Vivado run failed. Check log: {log_file}")
@@ -57,7 +56,6 @@ def run_vivado_autobuild(vivado_user, tcl_script, build_folder, result_folder, c
             shutil.rmtree(autobuild_path, ignore_errors=True)
 
         if process.returncode != 0:
-            err_log = "failure.bin"
             with open(err_log, "w") as f:
                 f.write(str(e))
             raise RuntimeError(f"Vivado run failed. Check log: {log_file}")
