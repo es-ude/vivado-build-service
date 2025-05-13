@@ -53,6 +53,8 @@ def run_vivado_autobuild(vivado_user, tcl_script, build_folder, result_folder, c
                 source_path) else shutil.copy(
                 source_path, result_folder)
 
+
+            print("autobuild.py line 57 TEST")
             shutil.rmtree(autobuild_path, ignore_errors=True)
 
         if process.returncode != 0:
