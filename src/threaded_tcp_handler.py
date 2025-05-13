@@ -35,14 +35,9 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         result_directory = task_directory + '/result'
         os.mkdir(result_directory)
 
-        # use task class:
         user_queue.enqueue_task(task)
 
-        if only_bin:
-            bin_dir = ''
-        else:
-            bin_dir = '/bin'
-        await_task_completion(directory=result_directory + bin_dir)
+        await_task_completion(directory=result_directory)
 
         response = prepare_response(result_directory)
         self.send(self, response, server_config)
@@ -95,15 +90,23 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         return task
 
 
-def await_task_completion(directory):
+def await_task_completion(directory):  # directory = {task_dir}/result
     while True:
-        if not os.path.exists(directory):
-            continue
-        for filename in os.listdir(directory):
-            if filename.endswith('.bin'):
-                print("#Task completed")
-                time.sleep(3)
-                return
+        bin_dir = os.path.join(directory, 'bin')
+        if os.path.exists(bin_dir):
+            found_bin = search_bin(bin_dir)
+        else:
+            found_bin = search_bin(directory)
+        if found_bin:
+            time.sleep(3)
+            return
+
+
+def search_bin(directory):
+    for filename in os.listdir(directory):
+        if filename.endswith('.bin'):
+            return True
+    return False
 
 
 def prepare_response(result_directory):

@@ -61,6 +61,12 @@ class Client:
         response = self._send_and_receive(s, data)
         result_dir = self._process_response(response)
 
+        bin_files = find_bin_files(result_dir)
+        for bf in bin_files:
+            if len(bin_files) == 0 or 'failure' in bf:
+                print("An Error occurred. Read Log file for more information.")
+                with open(bf, "w") as f:
+                    print(f.read())
         create_toml_reports(result_dir)
 
         if download_dir:
@@ -164,17 +170,26 @@ class Client:
 
     def _process_response(self, data):
         result_dir = self.task_dir + '/result'
-        filepath = result_dir + '/result.zip'
+        zip_file = result_dir + '/result.zip'
 
         os.mkdir(result_dir)
-        deserialize(data, filepath)
+        deserialize(data, zip_file)
 
-        status = unpack(origin=filepath, destination=result_dir)
+        status = unpack(origin=zip_file, destination=result_dir)
         self._logger.info(status)
 
-        os.remove(filepath)
+        os.remove(zip_file)
 
         return result_dir
+
+
+def find_bin_files(directory):
+    bin_files = []
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.lower().endswith('.bin'):
+                bin_files.append(file)
+    return bin_files
 
 
 def create_toml_reports(result_dir):

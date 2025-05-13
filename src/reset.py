@@ -22,6 +22,7 @@ def reset_environment():
     delete_directories_in("tests/testing-environment/tmp/client")
     delete_directories_in("tests/testing-environment/tmp/server")
     clear("tests/download")
+    shutil.rmtree("~/.autobuild", ignore_errors=True)
 
 
 def move_log_and_jou_files(origin, destination):

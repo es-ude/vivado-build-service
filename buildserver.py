@@ -95,24 +95,6 @@ def execute(task: Task, server_config: ServerConfig, event):
     logger.info("Task done for {}: Task nr. {} \n".format(task.user, task.job_id))
 
 
-def _run_bash_script(bash_script: str, bash_arguments: list[str]):
-    logger = logging.getLogger(__name__)
-    os_is_windows = sys.platform.startswith('win')
-    cygwin_path = ['C:\\cygwin64\\bin\\bash.exe', '-l']
-    unix_bash_path = []  # ['bin/bash', '-l']
-    bash_script_path = [os.path.abspath(bash_script)]
-
-    if os_is_windows:
-        bash_script_path = cygwin_path + bash_script_path
-    else:
-        bash_script_path = unix_bash_path + bash_script_path
-    try:
-        subprocess.run(bash_script_path + bash_arguments,
-                       stdout=None, stderr=None, check=True)
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Something went wrong while executing bash script (Error Code: {e.returncode})\n{e.stderr}")
-
-
 def delete_report_lines_in_dir(directory: str):
     for (root, dirs, files) in os.walk(directory, topdown=True):
         for file in files:
