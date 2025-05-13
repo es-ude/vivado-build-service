@@ -39,6 +39,12 @@ def run_vivado_autobuild(vivado_user, tcl_script, build_folder, result_folder, c
             for file in os.listdir(bin_source):
                 if file.endswith(".bin"):
                     shutil.copy(os.path.join(bin_source, file), f"{autobuild_path}/bin/")
+                    break
+            else:
+                err_log = "failure.bin"
+                with open(err_log, "w") as f:
+                    f.write(str(e))
+                # raise RuntimeError(f"Vivado run failed. Check log: {log_file}")
 
             shutil.copy(f"/home/{vivado_user}/.autobuild_script/create_project_full_run.tcl",
                         f"{autobuild_path}/tcl_script/")
