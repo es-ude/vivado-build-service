@@ -62,11 +62,14 @@ class Client:
         result_dir = self._process_response(response)
 
         bin_files = find_bin_files(result_dir)
+        if not bin_files or len(bin_files) == 0:
+            print("\nAn Error occurred. No bin file could be found.")
         for bf in bin_files:
-            if len(bin_files) == 0 or 'failure' in bf:
-                print("An Error occurred. Read Log file for more information.")
-                with open(bf, "w") as f:
-                    print(f.read())
+            if 'failure' in bf:
+                print(f"\nAn Error occurred. Read Vivado Run Log file for more information:"
+                      f"\n{result_dir}/vivado_run.log")
+                with open(bf, "r") as f:
+                    print(f"failure.bin content: {f.read()}")
         create_toml_reports(result_dir)
 
         if download_dir:

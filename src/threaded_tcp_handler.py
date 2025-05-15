@@ -3,7 +3,9 @@ import logging
 import shutil
 import socketserver
 import time
+from pathlib import Path
 
+from src.report_parser import create_toml_from_vivado_report, get_dict_from_vivado_report
 from src.user_queue import Task, UserQueue
 from src.config import ServerConfig, GeneralConfig
 from src.streamutil import split_stream, end_reached, remove_delimiter
@@ -98,7 +100,7 @@ def await_task_completion(directory):  # directory = {task_dir}/result
         else:
             found_bin = search_bin(directory)
         if found_bin:
-            time.sleep(3)
+            time.sleep(1)
             return
 
 
@@ -119,9 +121,26 @@ def prepare_response(result_directory):
     for report in reports:
         shutil.copy(report, reports_directory)
 
+    create_toml_reports(result_directory)
+
     new_zip = os.path.join(result_directory, 'result.zip')
     all_files = files + [os.path.join(reports_directory, report) for report in os.listdir(reports_directory)]
-
     pack(base_folder=result_directory, origin=all_files, destination=new_zip)
 
     return serialize(new_zip)
+
+
+def create_toml_reports(result_dir):
+    report_dir = os.path.join(result_dir, 'reports')
+    toml_dir = os.path.join(result_dir, 'toml')
+    os.makedirs(toml_dir, exist_ok=True)
+
+    for root, dirs, files in os.walk(report_dir):
+        for file in files:
+            report_path = Path(root) / file
+            toml_filepath = Path(toml_dir) / (get_filename(report_path) + '.toml')
+            create_toml_from_vivado_report(report_path, toml_filepath)
+
+
+def get_filename(filepath: Path) -> str:
+    return filepath.name.split('.')[0]
