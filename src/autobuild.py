@@ -35,23 +35,26 @@ def run_vivado_autobuild(vivado_user, tcl_script, build_folder, result_folder, c
             print(e)
     print("DEBUG LOG FILE FIN")
 
-    bin_source = f"{autobuild_path}/vivado_project/project_1.runs/impl_1"
-    for file in os.listdir(bin_source):
-        if file.endswith(".bin"):
-            shutil.copy(os.path.join(bin_source, file), f"{autobuild_path}/bin/")
-            break
-    else:
-        with open(err_log, "w") as f:
-            f.write("Err")
-        # raise RuntimeError(f"Vivado run failed. Check log: {log_file}")
+    try:
+        bin_source = f"{autobuild_path}/vivado_project/project_1.runs/impl_1"
+        for file in os.listdir(bin_source):
+            if file.endswith(".bin"):
+                shutil.copy(os.path.join(bin_source, file), f"{autobuild_path}/bin/")
+                break
+        else:
+            with open(err_log, "w") as f:
+                f.write("Err")
+            # raise RuntimeError(f"Vivado run failed. Check log: {log_file}")
 
-    shutil.copy(f"/home/{vivado_user}/.autobuild_script/create_project_full_run.tcl",
-                f"{autobuild_path}/tcl_script/")
+        shutil.copy(f"/home/{vivado_user}/.autobuild_script/create_project_full_run.tcl",
+                    f"{autobuild_path}/tcl_script/")
 
-    source_path = f"{autobuild_path}/{bin_mode}"
-    shutil.copytree(source_path, result_folder, dirs_exist_ok=True) if os.path.isdir(
-        source_path) else shutil.copy(
-        source_path, result_folder)
+        source_path = f"{autobuild_path}/{bin_mode}"
+        shutil.copytree(source_path, result_folder, dirs_exist_ok=True) if os.path.isdir(
+            source_path) else shutil.copy(
+            source_path, result_folder)
 
-    print("autobuild.py line 57 TEST")
-    shutil.rmtree(autobuild_path, ignore_errors=True)
+        print("autobuild.py line 57 TEST")
+        shutil.rmtree(autobuild_path, ignore_errors=True)
+    except Exception as e:
+        print(e)
