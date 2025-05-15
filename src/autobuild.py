@@ -42,7 +42,7 @@ def run_vivado_autobuild(vivado_user, tcl_script, build_folder, result_folder, c
                     break
             else:
                 with open(err_log, "w") as f:
-                    f.write(str(e))
+                    pass
                 # raise RuntimeError(f"Vivado run failed. Check log: {log_file}")
 
             shutil.copy(f"/home/{vivado_user}/.autobuild_script/create_project_full_run.tcl",
@@ -59,5 +59,5 @@ def run_vivado_autobuild(vivado_user, tcl_script, build_folder, result_folder, c
 
         if process.returncode != 0:
             with open(err_log, "w") as f:
-                f.write(str(e))
+                pass
             raise RuntimeError(f"Vivado run failed. Check log: {log_file}")
