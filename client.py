@@ -69,10 +69,10 @@ class Client:
             if 'failure' in bf:
                 print(f"\nAn Error occurred. Read Vivado Run Log file for more information:"
                       f"\n{result_dir}/vivado_run.log")
+                print("failure.bin content:\n")
+                time.sleep(1)
                 with open(bf, "r") as f:
-                    print(f"failure.bin content: {f.read()}")
-        create_toml_reports(result_dir)
-
+                    print(f.read())
         if download_dir:
             copy_tree(src=result_dir, dst=download_dir)
         s.close()
