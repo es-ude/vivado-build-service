@@ -39,7 +39,7 @@ def run_vivado_autobuild(vivado_user, tcl_script, build_folder, result_folder, c
                 f.write(f"Vivado run failed. Check log: {log_file}")
         shutil.copy(f"/home/{vivado_user}/.autobuild_script/create_project_full_run.tcl",
                     f"{autobuild_path}/tcl_script/")
-        source_path = f"{autobuild_path}/{bin_mode}"
+        source_path = autobuild_path + bin_mode
         shutil.copytree(source_path, result_folder, dirs_exist_ok=True) if os.path.isdir(
             source_path) else shutil.copy(
             source_path, result_folder)

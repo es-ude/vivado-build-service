@@ -60,6 +60,7 @@ class Client:
         s = self._connect_with_socket()
         response = self._send_and_receive(s, data)
         result_dir = self._process_response(response)
+        self.stop_loading_animation_event.set()
 
         bin_files = find_bin_files(result_dir)
         if not bin_files or len(bin_files) == 0:
@@ -74,7 +75,6 @@ class Client:
 
         if download_dir:
             copy_tree(src=result_dir, dst=download_dir)
-        self.stop_loading_animation_event.set()
         s.close()
 
     def _forward_port(self):
