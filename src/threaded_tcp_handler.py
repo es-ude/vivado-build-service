@@ -124,7 +124,7 @@ def prepare_response(result_directory):
     create_toml_reports(result_directory)
 
     new_zip = os.path.join(result_directory, 'result.zip')
-    all_files = files + [os.path.join(reports_directory, report) for report in os.listdir(reports_directory)]
+    all_files = get_filepaths(result_directory)
     pack(base_folder=result_directory, origin=all_files, destination=new_zip)
 
     return serialize(new_zip)
