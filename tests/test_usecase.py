@@ -21,7 +21,7 @@ class Test(TestCase):
     receive_directory = 'tests/testing-environment/tmp/server'
     send_directory = 'tests/testing-environment/tmp/client'
 
-    server_vivado_user = 'dominik'
+    server_vivado_user = 'vivado'
     server_port = 2025
 
     server_config = ServerConfig(
@@ -73,7 +73,8 @@ class Test(TestCase):
             task_directory_exists = self.client.task_dir is not None
             self.assertTrue(task_directory_exists, "Task directory does not exist")
 
-            self.compare_directories(dir1=self.client.task_dir, dir2=self.download_directory)
+            result_dir = os.path.join(self.client.task_dir, 'result')
+            self.compare_directories(dir1=result_dir, dir2=self.download_directory)
 
         except TimeoutError:
             self.fail("Timed out waiting for completion")

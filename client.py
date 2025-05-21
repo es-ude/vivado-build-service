@@ -14,9 +14,10 @@ from distutils.dir_util import copy_tree
 
 import tomli
 
-from src.config import ClientConfig, GeneralConfig, default_general_config
-from src.filehandler import make_personal_dir_and_get_task, get_filepaths, serialize, pack, unpack, deserialize
 from src.streamutil import join_streams
+from src.config import ClientConfig, GeneralConfig, default_general_config
+from src.report_parser import get_dict_from_vivado_report, get_toml_string, create_toml_from_vivado_report
+from src.filehandler import make_personal_dir_and_get_task, get_filepaths, serialize, pack, unpack, deserialize, get_filename
 
 
 class Client:
@@ -59,9 +60,21 @@ class Client:
         s = self._connect_with_socket()
         response = self._send_and_receive(s, data)
         result_dir = self._process_response(response)
+        self.stop_loading_animation_event.set()
+
+        bin_files = find_bin_files(result_dir)
+        if not bin_files or len(bin_files) == 0:
+            print("\nAn Error occurred. No bin file could be found.")
+        for bf in bin_files:
+            if 'failure' in bf:
+                print(f"\nAn Error occurred. Read Vivado Run Log file for more information:"
+                      f"\n{result_dir}/vivado_run.log")
+                print("failure.bin content:\n")
+                time.sleep(1)
+                with open(bf, "r") as f:
+                    print(f.read())
         if download_dir:
             copy_tree(src=result_dir, dst=download_dir)
-        self.stop_loading_animation_event.set()
         s.close()
 
     def _forward_port(self):
@@ -160,17 +173,40 @@ class Client:
 
     def _process_response(self, data):
         result_dir = self.task_dir + '/result'
-        filepath = result_dir + '/result.zip'
+        zip_file = result_dir + '/result.zip'
 
         os.mkdir(result_dir)
-        deserialize(data, filepath)
+        deserialize(data, zip_file)
 
-        status = unpack(origin=filepath, destination=result_dir)
+        status = unpack(origin=zip_file, destination=result_dir)
         self._logger.info(status)
 
-        os.remove(filepath)
+        os.remove(zip_file)
 
         return result_dir
+
+
+def find_bin_files(directory):
+    bin_files = []
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.lower().endswith('.bin'):
+                bin_files.append(file)
+    return bin_files
+
+
+def create_toml_reports(result_dir):
+    report_dir = os.path.join(result_dir, 'reports')
+    toml_dir = os.path.join(result_dir, 'toml')
+    os.makedirs(toml_dir, exist_ok=True)
+
+    for root, dirs, files in os.walk(report_dir):
+        for file in files:
+            report_path = Path(root) / file
+            toml_filepath = Path(toml_dir) / (get_filename(report_path) + '.toml')
+            create_toml_from_vivado_report(report_path, toml_filepath)
+            report_dict = get_dict_from_vivado_report(report_path)
+            print(get_toml_string(report_dict))
 
 
 def parse_sys_argv(default_config_path):
@@ -203,7 +239,7 @@ def parse_sys_argv(default_config_path):
 def main():
     """
     A correct call from the command line looks like this:
-        client.py {username} {upload_dir} {download_dir} {config_path} {-b}
+        client.py {username} {upload_dir} {model_number} {download_dir} {config_path} {-b}
 
     username        User that connects to the server
     upload_dir      Directory where the build files are located

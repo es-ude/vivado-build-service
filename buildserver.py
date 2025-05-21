@@ -10,6 +10,7 @@ import tomli
 
 from src.user_queue import UserQueue, Task
 from src.reset import move_log_and_jou_files
+from src.autobuild import run_vivado_autobuild
 from src.filehandler import configure_bash_scripts
 from src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
 from src.config import ServerConfig, GeneralConfig, default_general_config
@@ -57,8 +58,8 @@ class BuildServer:
                 break
             task: Task = self.user_queue.dequeue_task()
             if task is not None:
-                task.print()
-                self._executor.submit(execute, task, self.server_config, shutdown_event)
+                is_test = self.general_config.is_test
+                self._executor.submit(execute, task, self.server_config, shutdown_event, is_test)
 
     def stop(self):
         self._logger.info("Shutting down...")
@@ -68,62 +69,34 @@ class BuildServer:
         self._logger.info("Shutdown complete.")
 
 
-def execute(task: Task, server_config: ServerConfig, event):
+def execute(task: Task, server_config: ServerConfig, event, is_test):
     logger = logging.getLogger(__name__)
     if event.is_set():
         return
 
-    logger.info("Handling task for {}: Task nr. {}".format(task.user, task.job_id))
+    logger.info("Handling task for {}: Task nr. {}\n".format(task.user, task.job_id))
+    task.print()
+
     delete_report_lines_in_dir(os.path.abspath(task.path))
     task_path = task.abspath
     result_dir = os.path.join(task_path, 'result')
-    bash_arguments = [
-        server_config.server_vivado_user,
-        server_config.tcl_script,
-        task_path,
-        result_dir,
-        server_config.constraints,
-        task.bin_file_path,
-        task.model_number
-    ]
-    logger.info("Running Bash Script\n")
-    logger.info(get_bash_arguments_debug_message(bash_arguments))
 
-    _run_bash_script(server_config.bash_script, bash_arguments)
+    if not is_test:
+        logger.info("Running Vivado\n")
+        run_vivado_autobuild(
+            server_config.tcl_script,
+            task_path,
+            result_dir,
+            server_config.constraints,
+            task.bin_file_path,
+            task.model_number
+        )
+    else:
+        with open(os.path.join(result_dir, 'completed.bin'), 'w'):
+            pass
+
     move_log_and_jou_files(origin=".", destination="log")
     logger.info("Task done for {}: Task nr. {} \n".format(task.user, task.job_id))
-
-
-def _run_bash_script(bash_script: str, bash_arguments: list[str]):
-    logger = logging.getLogger(__name__)
-    os_is_windows = sys.platform.startswith('win')
-    cygwin_path = ['C:\\cygwin64\\bin\\bash.exe', '-l']
-    unix_bash_path = []  # ['bin/bash', '-l']
-    bash_script_path = [os.path.abspath(bash_script)]
-
-    if os_is_windows:
-        bash_script_path = cygwin_path + bash_script_path
-    else:
-        bash_script_path = unix_bash_path + bash_script_path
-    try:
-        subprocess.run(bash_script_path + bash_arguments,
-                       stdout=None, stderr=None, check=True)
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Something went wrong while executing bash script (Error Code: {e.returncode})\n{e.stderr}")
-
-
-def get_bash_arguments_debug_message(bash_arguments):
-    return (
-        f"\n"
-        f"Bash Arguments:\n\t"
-        f"Vivado Server Username:      {bash_arguments[0]}\n\t"
-        f"Path to .tcl script:         {bash_arguments[1]}\n\t"
-        f"Path to task:                {bash_arguments[2]}\n\t"
-        f"Path to result directory:    {bash_arguments[3]}\n\t"
-        f"Path to constraints file:    {bash_arguments[4]}\n\t"
-        f"Only .bin modifier:          {bash_arguments[5]}\n\t"
-        f"FPGA model number:           {bash_arguments[6]}\n"
-    )
 
 
 def delete_report_lines_in_dir(directory: str):

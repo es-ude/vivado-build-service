@@ -1,6 +1,7 @@
 import os
 import shutil
 import zipfile
+from pathlib import Path
 from zipfile import ZipFile
 
 from src.user_queue import Task
@@ -94,6 +95,20 @@ def create_file(file, directory):
         pass
 
 
+def get_report_file_paths(files) -> [str]:
+    filepaths = []
+    for file in files:
+        if is_report(file):
+            filepaths.append(file)
+    return filepaths
+
+
+def is_report(file):
+    if '.rpt' not in file or 'clock' in file:
+        return False
+    return "utilization" in file or "power" in file
+
+
 def dos2unix(origin, destination):
     with open(destination, "w") as f_out:
         with open(origin, "r") as f_in:
@@ -116,3 +131,7 @@ def configure_bash_scripts(bash_dir):
                 unix_file = os.path.join(bash_dir, "_".join(file.split('_')[:-1])) + '_unix.sh'
                 dos2unix(filepath, unix_file)
                 grant_permissions(filepath)
+
+
+def get_filename(filepath: Path) -> str:
+    return filepath.name.split('.')[0]

@@ -1,11 +1,15 @@
 import os
 import logging
+import shutil
 import socketserver
+import time
+from pathlib import Path
 
+from src.report_parser import create_toml_from_vivado_report, get_dict_from_vivado_report
 from src.user_queue import Task, UserQueue
 from src.config import ServerConfig, GeneralConfig
 from src.streamutil import split_stream, end_reached, remove_delimiter
-from src.filehandler import make_personal_dir_and_get_task, deserialize, unpack, get_filepaths, pack, serialize
+from src.filehandler import make_personal_dir_and_get_task, deserialize, unpack, get_filepaths, pack, serialize, get_report_file_paths
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
@@ -33,11 +37,11 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         result_directory = task_directory + '/result'
         os.mkdir(result_directory)
 
-        # use task class:
         user_queue.enqueue_task(task)
 
-        await_task_completion(directory=result_directory + '/output')
-        response = prepare_response(result_directory, task_directory)
+        await_task_completion(directory=result_directory)
+
+        response = prepare_response(result_directory)
         self.send(self, response, server_config)
         self.request.close()
 
@@ -88,18 +92,55 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         return task
 
 
-def await_task_completion(directory):
+def await_task_completion(directory):  # directory = {task_dir}/result
     while True:
-        if not os.path.exists(directory):
-            continue
-        for filename in os.listdir(directory):
-            if filename.endswith('.bin'):
-                return
+        bin_dir = os.path.join(directory, 'bin')
+        if os.path.exists(bin_dir):
+            found_bin = search_bin(bin_dir)
+        else:
+            found_bin = search_bin(directory)
+        if found_bin:
+            time.sleep(1)
+            return
 
 
-def prepare_response(result_directory, task_directory):
+def search_bin(directory):
+    for filename in os.listdir(directory):
+        if filename.endswith('.bin'):
+            return True
+    return False
+
+
+def prepare_response(result_directory):
     files = get_filepaths(result_directory)
-    filepath = '/'.join([result_directory, 'result.zip'])
-    pack(base_folder=task_directory, origin=files, destination=filepath)
+    reports = get_report_file_paths(files)
 
-    return serialize(filepath)
+    reports_directory = os.path.join(result_directory, 'reports')
+    os.makedirs(reports_directory, exist_ok=True)
+
+    for report in reports:
+        shutil.copy(report, reports_directory)
+
+    create_toml_reports(result_directory)
+
+    new_zip = os.path.join(result_directory, 'result.zip')
+    all_files = get_filepaths(result_directory)
+    pack(base_folder=result_directory, origin=all_files, destination=new_zip)
+
+    return serialize(new_zip)
+
+
+def create_toml_reports(result_dir):
+    report_dir = os.path.join(result_dir, 'reports')
+    toml_dir = os.path.join(result_dir, 'toml')
+    os.makedirs(toml_dir, exist_ok=True)
+
+    for root, dirs, files in os.walk(report_dir):
+        for file in files:
+            report_path = Path(root) / file
+            toml_filepath = Path(toml_dir) / (get_filename(report_path) + '.toml')
+            create_toml_from_vivado_report(report_path, toml_filepath)
+
+
+def get_filename(filepath: Path) -> str:
+    return filepath.name.split('.')[0]
