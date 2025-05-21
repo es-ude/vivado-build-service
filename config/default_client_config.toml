@@ -1,12 +1,10 @@
-#   Configure your program here and
-#   rename this file to 'client_config.toml' for changes to apply.
-queue_user = '{Your Username}'
+#   Configure your program here and rename this file to 'client_config.toml' for changes to apply.
+queue_user = '{Your personal username}'
 
-#   [server]: 'username' and [server]: 'ip address' must be configured in order to function
-#   'vivado_user' is the name of the user profile for vivado synthesis on your server.
+#   [server]: 'ip address' and [server]: 'port' must be configured in order to function
 #   'ip address' is the ip address of your server.
+#   'port' must be the same as in 'server_config.toml'
 [server]
-vivado_user = '{Your Server Vivado User Profile}'
 ip_address = '{Your Server IP Address}'
 port = '{Your Server Port}'
 

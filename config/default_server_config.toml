@@ -1,7 +1,6 @@
-#   Configure your program here and
-#   rename this file to 'server_config.toml' for changes to apply.
+#   No need to configure this if you are a client!
+#   Configure your server here and rename this file to 'server_config.toml' for changes to apply.
 [server]
-vivado_user = '{Your Server Vivado User Profile}'
 port = '{Your Server Port}'
 
 [paths]
