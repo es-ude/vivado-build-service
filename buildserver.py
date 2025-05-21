@@ -58,7 +58,8 @@ class BuildServer:
                 break
             task: Task = self.user_queue.dequeue_task()
             if task is not None:
-                self._executor.submit(execute, task, self.server_config, shutdown_event)
+                is_test = self.general_config.is_test
+                self._executor.submit(execute, task, self.server_config, shutdown_event, is_test)
 
     def stop(self):
         self._logger.info("Shutting down...")
@@ -68,7 +69,7 @@ class BuildServer:
         self._logger.info("Shutdown complete.")
 
 
-def execute(task: Task, server_config: ServerConfig, event):
+def execute(task: Task, server_config: ServerConfig, event, is_test):
     logger = logging.getLogger(__name__)
     if event.is_set():
         return
@@ -80,16 +81,19 @@ def execute(task: Task, server_config: ServerConfig, event):
     task_path = task.abspath
     result_dir = os.path.join(task_path, 'result')
 
-    logger.info("Running Vivado\n")
-    run_vivado_autobuild(
-        server_config.server_vivado_user,
-        server_config.tcl_script,
-        task_path,
-        result_dir,
-        server_config.constraints,
-        task.bin_file_path,
-        task.model_number
-    )
+    if not is_test:
+        logger.info("Running Vivado\n")
+        run_vivado_autobuild(
+            server_config.tcl_script,
+            task_path,
+            result_dir,
+            server_config.constraints,
+            task.bin_file_path,
+            task.model_number
+        )
+    else:
+        with open(os.path.join(result_dir, 'completed.bin'), 'w'):
+            pass
 
     move_log_and_jou_files(origin=".", destination="log")
     logger.info("Task done for {}: Task nr. {} \n".format(task.user, task.job_id))
