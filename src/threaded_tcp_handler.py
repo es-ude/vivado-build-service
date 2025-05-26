@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 from src.report_parser import create_toml_from_vivado_report
+from src.task_factory import task_from_raw_request
 from src.user_queue import Task, UserQueue
 from src.config import GeneralConfig
 from src.streamutil import end_reached, remove_delimiter
@@ -34,7 +35,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         general_config = self.server.general_config
 
         raw_data = self.get_request(self, general_config)
-        task = Task.from_raw_request(raw_data, general_config, server_config.receive_folder)
+        task = task_from_raw_request(raw_data, general_config, server_config.receive_folder)
 
         task_directory = task.path
         result_directory = task_directory + '/result'
