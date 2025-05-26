@@ -26,22 +26,22 @@ def run_vivado_autobuild(tcl_script, build_folder, result_folder, constraints, b
 
 
 def clear_autobuild():
-    shutil.rmtree("~/.autobuild", ignore_errors=True)
+    shutil.rmtree(os.path.expanduser("~/.autobuild"), ignore_errors=True)
 
 
 def make_directories():
-    os.makedirs(f"~/.autobuild/input_srcs/srcs", exist_ok=True)
-    os.makedirs(f"~/.autobuild/input_srcs/constraints", exist_ok=True)
-    os.makedirs(f"~/.autobuild/vivado_project", exist_ok=True)
-    os.makedirs(f"~/.autobuild/bin", exist_ok=True)
-    os.makedirs(f"~/.autobuild/tcl_script", exist_ok=True)
-    os.makedirs(f"~/.autobuild/reports", exist_ok=True)
-    os.makedirs(f"~/.autobuild/toml", exist_ok=True)
+    os.makedirs(os.path.expanduser("~/.autobuild/input_srcs/srcs"), exist_ok=True)
+    os.makedirs(os.path.expanduser("~/.autobuild/input_srcs/constraints"), exist_ok=True)
+    os.makedirs(os.path.expanduser("~/.autobuild/vivado_project"), exist_ok=True)
+    os.makedirs(os.path.expanduser("~/.autobuild/bin"), exist_ok=True)
+    os.makedirs(os.path.expanduser("~/.autobuild/tcl_script"), exist_ok=True)
+    os.makedirs(os.path.expanduser("~/.autobuild/reports"), exist_ok=True)
+    os.makedirs(os.path.expanduser("~/.autobuild/toml"), exist_ok=True)
 
 
 def copy_task_files(constraints, build_folder):
-    shutil.copy(constraints, f"~/.autobuild/input_srcs/constraints")
-    shutil.copytree(build_folder, f"~/.autobuild/input_srcs/srcs", dirs_exist_ok=True)
+    shutil.copy(constraints, os.path.expanduser("~/.autobuild/input_srcs/constraints"))
+    shutil.copytree(build_folder, os.path.expanduser("~/.autobuild/input_srcs/srcs"), dirs_exist_ok=True)
 
 
 def set_vivado_environment(tcl_script, tcl_args):
@@ -65,10 +65,10 @@ def copy_autobuild_files(log):
 
 
 def copy_bin_files(log):
-    bin_source = "~/.autobuild/vivado_project/project_1.runs/impl_1"
+    bin_source = os.path.expanduser("~/.autobuild/vivado_project/project_1.runs/impl_1")
     for file in os.listdir(bin_source):
         if file.endswith(".bin"):
-            shutil.copy(os.path.join(bin_source, file), "~/.autobuild/bin/")
+            shutil.copy(os.path.join(bin_source, file), os.path.expanduser("~/.autobuild/bin/"))
             break
     else:
         with open(log[1], "w") as f:
@@ -76,13 +76,13 @@ def copy_bin_files(log):
 
 
 def copy_tcl_files():
-    shutil.copy("~/.autobuild_script/create_project_full_run.tcl",
-                "~/.autobuild/tcl_script/")
+    shutil.copy(os.path.expanduser("~/.autobuild_script/create_project_full_run.tcl"),
+                os.path.expanduser("~/.autobuild/tcl_script/"))
 
 
 def copy_report_files():
-    project_dir = "~/.autobuild/vivado_project"
-    report_dir = "~/.autobuild/reports"
+    project_dir = os.path.expanduser("~/.autobuild/vivado_project")
+    report_dir = os.path.expanduser("~/.autobuild/reports")
     reports = get_reports(project_dir)
     for report in reports:
         shutil.copy(report, report_dir)
@@ -95,8 +95,8 @@ def get_reports(directory):
 
 
 def parse_reports():
-    report_dir = f"~/.autobuild/reports"
-    toml_dir = f"~/.autobuild/toml"
+    report_dir = os.path.expanduser("~/.autobuild/reports")
+    toml_dir = os.path.expanduser("~/.autobuild/toml")
     for root, dirs, files in os.walk(report_dir):
         for file in files:
             report_path = Path(root) / file
@@ -105,7 +105,7 @@ def parse_reports():
 
 
 def copy_result(result_folder, bin_mode):
-    source_path = "~/.autobuild"
+    source_path = os.path.expanduser("~/.autobuild")
     copy_toml(os.path.join(source_path, 'toml'), os.path.join(result_folder, 'toml reports'))
     copy_bin(source_path + bin_mode, result_folder)
 

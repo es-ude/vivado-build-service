@@ -10,7 +10,7 @@ proc exit_on_error {errorMsg} {
 if {[catch {
 
     # Check if a custom part number is provided via system arguments
-    if {[llength $::argv] > 0} {
+    if {[length $::argv] > 0} {
         set part_number [lindex $::argv 0]
     } else {
         error "No part number provided. Usage: vivado -mode tcl -source run.tcl -part <part_number>"

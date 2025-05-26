@@ -16,5 +16,5 @@ client.build(
     download_dir='tests/download',
     # model_number='TEST FAILURE',
     model_number='xc7s15ftgb196-2',
-    only_bin_files=False
+    only_bin_files=True
 )
