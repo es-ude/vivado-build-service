@@ -112,11 +112,8 @@ def search_bin(directory):
 
 
 def prepare_response(result_directory):
-    files = get_filepaths(result_directory)
-    reports = get_report_file_paths(files)
-
-    reports_directory = os.path.join(result_directory, 'reports')
-    os.makedirs(reports_directory, exist_ok=True)
+    reports = get_reports(result_directory)
+    reports_directory = get_report_dir(result_directory)
 
     for report in reports:
         shutil.copy(report, reports_directory)
@@ -128,6 +125,18 @@ def prepare_response(result_directory):
     pack(base_folder=result_directory, origin=all_files, destination=new_zip)
 
     return serialize(new_zip)
+
+
+def get_reports(directory):
+    files = get_filepaths(directory)
+    reports = get_report_file_paths(files)
+    return reports
+
+
+def get_report_dir(directory):
+    reports_directory = os.path.join(directory, 'reports')
+    os.makedirs(reports_directory, exist_ok=True)
+    return reports_directory
 
 
 def create_toml_reports(result_dir):
