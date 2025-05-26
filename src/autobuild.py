@@ -40,8 +40,8 @@ def make_directories():
 
 
 def copy_task_files(constraints, build_folder):
-    shutil.copy(constraints, f"~/input_srcs/constraints")
-    shutil.copytree(build_folder, f"~/input_srcs/srcs", dirs_exist_ok=True)
+    shutil.copy(constraints, f"~/.autobuild/input_srcs/constraints")
+    shutil.copytree(build_folder, f"~/.autobuild/input_srcs/srcs", dirs_exist_ok=True)
 
 
 def set_vivado_environment(tcl_script, tcl_args):
