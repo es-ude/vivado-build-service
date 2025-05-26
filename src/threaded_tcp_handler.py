@@ -5,11 +5,12 @@ import socketserver
 import time
 from pathlib import Path
 
-from src.report_parser import create_toml_from_vivado_report, get_dict_from_vivado_report
+from src.report_parser import create_toml_from_vivado_report
 from src.user_queue import Task, UserQueue
-from src.config import ServerConfig, GeneralConfig
-from src.streamutil import split_stream, end_reached, remove_delimiter
-from src.filehandler import make_personal_dir_and_get_task, deserialize, unpack, get_filepaths, pack, serialize, get_report_file_paths
+from src.config import GeneralConfig
+from src.streamutil import end_reached, remove_delimiter
+from src.filehandler import (make_personal_dir_and_get_task, deserialize,
+                             unpack, get_filepaths, pack, serialize, get_report_file_paths)
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
@@ -31,14 +32,15 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         user_queue: UserQueue = self.server.user_queue
         server_config = self.server.server_config
         general_config = self.server.general_config
-        data, client_address, model_number, only_bin = self.get_request(self, server_config)
-        task = self.process_request(data, client_address, model_number, only_bin)
+
+        raw_data = self.get_request(self, general_config)
+        task = Task.from_raw_request(raw_data, general_config, server_config.receive_folder)
+
         task_directory = task.path
         result_directory = task_directory + '/result'
         os.mkdir(result_directory)
 
         user_queue.enqueue_task(task)
-
         await_task_completion(directory=result_directory)
 
         response = prepare_response(result_directory)
@@ -56,26 +58,15 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
 
     def get_request(self, tcp_handler, general_config: GeneralConfig):
         data = b''
-        client_username = ''
-
         while True:
             chunk = tcp_handler.request.recv(self.server.general_config.chunk_size)
             data += chunk
-
-            if not client_username:
-                client_username, stream = split_stream(data, self.server.general_config.delimiter.encode())
-                model_number, stream = split_stream(stream, self.server.general_config.delimiter.encode())
-                only_bin_file, stream = split_stream(stream, self.server.general_config.delimiter.encode())
-                only_bin_file = bool(int(only_bin_file))
-                data = stream
-                logging.info("Receiving data from '{}' {}.\n".format(client_username, tcp_handler.client_address))
-
             if (len(chunk) < self.server.general_config.chunk_size or
                     end_reached(chunk, self.server.general_config.delimiter)):
                 break
 
         data = remove_delimiter(data, self.server.general_config.delimiter)
-        return data, client_username, model_number, only_bin_file
+        return data
 
     def process_request(self, data, user, model_number, only_bin) -> Task:  # Server
         task = make_personal_dir_and_get_task(user, self.server.server_config.receive_folder, model_number, only_bin)
@@ -92,7 +83,7 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         return task
 
 
-def await_task_completion(directory):  # directory = {task_dir}/result
+def await_task_completion(directory):
     while True:
         bin_dir = os.path.join(directory, 'bin')
         if os.path.exists(bin_dir):
