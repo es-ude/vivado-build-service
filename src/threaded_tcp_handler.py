@@ -65,8 +65,6 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
             if (len(chunk) < self.server.general_config.chunk_size or
                     end_reached(chunk, self.server.general_config.delimiter)):
                 break
-
-        data = remove_delimiter(data, self.server.general_config.delimiter)
         return data
 
     def process_request(self, data, user, model_number, only_bin) -> Task:  # Server
