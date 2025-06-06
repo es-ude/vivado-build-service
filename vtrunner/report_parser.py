@@ -26,13 +26,3 @@ def create_toml_from_vivado_report(report_filepath: Path, toml_destination_filep
     os.makedirs(toml_dir, exist_ok=True)
     with open(toml_destination_filepath, "w") as f:
         f.write(toml_string)
-
-
-def main():
-    report_filepath = Path("../tmp/client/dominik/41/result/reports/env5_top_reconfig_power_routed.rpt")
-    report_dict = get_dict_from_vivado_report(report_filepath)
-    print(get_toml_string(report_dict))
-
-
-if __name__ == "__main__":
-    main()

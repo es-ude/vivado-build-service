@@ -7,6 +7,3 @@ queue_user = '{Your personal username}'
 [server]
 ip_address = '{Your Server IP Address}'
 port = '{Your Server Port}'
-
-[paths]
-send_dir = 'tmp/client'

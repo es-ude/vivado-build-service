@@ -7,8 +7,8 @@ from unittest import TestCase
 
 from buildserver import BuildServer
 from client import Client
-from src.config import ClientConfig, ServerConfig
-from src.filehandler import delete_directories_in, clear
+from vtrunner.config import ClientConfig, ServerConfig
+from vtrunner.filehandler import delete_directories_in, clear
 
 
 class Test(TestCase):
@@ -25,20 +25,13 @@ class Test(TestCase):
     server_port = 2025
 
     server_config = ServerConfig(
-        server_vivado_user=server_vivado_user,
         server_port=server_port,
-        tcl_script='scripts/tcl/create_project_full_run.tcl',
-        constraints='scripts/constraints/env5_config.xdc',
-        bash_script='scripts/bash/testing_dos.sh',
-        receive_folder=receive_directory,
         num_workers=12
     )
     client_config = ClientConfig(
-        server_vivado_user=server_vivado_user,
         server_port=server_port,
         server_ip_address='localhost',
         queue_user='Test',
-        send_dir=send_directory
     )
 
     server = BuildServer(server_config)
