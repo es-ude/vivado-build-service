@@ -5,22 +5,23 @@ import socketserver
 import time
 from pathlib import Path
 
-from src.report_parser import create_toml_from_vivado_report
-from src.task_factory import task_from_raw_request
-from src.user_queue import Task, UserQueue
-from src.config import GeneralConfig
-from src.streamutil import end_reached, remove_delimiter
-from src.filehandler import (make_personal_dir_and_get_task, deserialize,
-                             unpack, get_filepaths, pack, serialize, get_report_file_paths)
+from vtrunner.report_parser import create_toml_from_vivado_report
+from vtrunner.task_factory import task_from_raw_request
+from vtrunner.user_queue import Task, UserQueue
+from vtrunner.config import GeneralConfig
+from vtrunner.streamutil import end_reached
+from vtrunner.filehandler import (make_personal_dir_and_get_task, deserialize,
+                                  unpack, get_filepaths, pack, serialize, get_report_file_paths)
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    def __init__(self, server_address, request_handler_class, user_queue, server_config, event, general_config):
+    def __init__(self, server_address, request_handler_class, user_queue, server_config, event, server_paths, general_config):
         socketserver.ThreadingMixIn.__init__(self)
         socketserver.TCPServer.__init__(self, server_address, request_handler_class)
         self.event = event
         self.user_queue = user_queue
         self.server_config = server_config
+        self.server_paths = server_paths
         self.general_config = general_config
 
 
@@ -33,9 +34,10 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         user_queue: UserQueue = self.server.user_queue
         server_config = self.server.server_config
         general_config = self.server.general_config
+        server_paths = self.server.server_paths
 
         raw_data = self.get_request(self, general_config)
-        task = task_from_raw_request(raw_data, general_config, server_config.receive_folder)
+        task = task_from_raw_request(raw_data, general_config, server_paths.receive_folder)
 
         task_directory = task.path
         result_directory = task_directory + '/result'
@@ -68,9 +70,9 @@ class ThreadedTCPHandler(socketserver.BaseRequestHandler):
         return data
 
     def process_request(self, data, user, model_number, only_bin) -> Task:  # Server
-        task = make_personal_dir_and_get_task(user, self.server.server_config.receive_folder, model_number, only_bin)
+        task = make_personal_dir_and_get_task(user, self.server.server_paths.receive_folder, model_number, only_bin)
         task_dir = task.path
-        filepath = '/'.join([task_dir, self.server.general_config.request_file])
+        filepath = '/'.join([task_dir, 'build.zip'])
 
         deserialize(data, filepath)
 

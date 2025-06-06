@@ -14,13 +14,15 @@ from distutils.dir_util import copy_tree
 
 import tomli
 
-from src.streamutil import join_streams
-from src.config import ClientConfig, GeneralConfig, default_general_config
-from src.filehandler import make_personal_dir_and_get_task, get_filepaths, serialize, pack, unpack, deserialize
+from vtrunner.streamutil import join_streams
+from vtrunner.paths import ClientPaths, TMP_CLIENT_DIR
+from vtrunner.config import ClientConfig, GeneralConfig, default_general_config
+from vtrunner.filehandler import make_personal_dir_and_get_task, get_filepaths, serialize, pack, unpack, deserialize
 
 
 class Client:
     def __init__(self, client_config: ClientConfig, general_config: GeneralConfig = None):
+        self.paths: ClientPaths = init_paths()
         self._logger = logging.getLogger(__name__)
         self.task_dir = None
         self.client_config = client_config
@@ -37,11 +39,9 @@ class Client:
         with open(path, 'rb') as f:
             config = tomli.load(f)
         config = ClientConfig(
-            server_vivado_user=config['server']['vivado_user'],
             server_port=int(config['server']['port']),
             server_ip_address=config['server']['ip_address'],
             queue_user=config['queue_user'],
-            send_dir=config['paths']['send_dir']
         )
         return cls(config)
 
@@ -77,19 +77,17 @@ class Client:
         s.close()
 
     def _forward_port(self):
-        ssh_command = "ssh -Y -L {}:{}:{} {}@{}".format(
+        ssh_command = "ssh -Y -L {}:localhost:{} vivado@{}".format(
             self.client_config.server_port,
-            'localhost',
             self.client_config.server_port,
-            self.client_config.server_vivado_user,
             self.client_config.server_ip_address
         )
         subprocess.Popen(ssh_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
 
     def _prepare_request(self, upload_directory: str, user: str) -> Tuple[str, str]:
         file_list = get_filepaths(upload_directory)
-        task = make_personal_dir_and_get_task(user, self.client_config.send_dir, self.model_number, self.only_bin)
-        target_filepath = os.path.join(*[task.path, self.general_config.request_file])
+        task = make_personal_dir_and_get_task(user, self.paths.send_dir, self.model_number, self.only_bin)
+        target_filepath = os.path.join(*[task.path, 'build.zip'])
         pack(base_folder=upload_directory, origin=file_list, destination=target_filepath)
 
         return serialize(target_filepath), task.path
@@ -183,6 +181,11 @@ class Client:
         os.remove(zip_file)
 
         return result_dir
+
+
+def init_paths() -> ClientPaths:
+    paths = ClientPaths(send_dir=TMP_CLIENT_DIR)
+    return paths
 
 
 def find_bin_files(directory):

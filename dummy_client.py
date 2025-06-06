@@ -1,8 +1,7 @@
 from client import Client
-from src.config import ClientConfig
+from vtrunner.config import ClientConfig
 
 client_config = ClientConfig(
-    server_vivado_user='vivado',
     server_port=2025,
     server_ip_address='65.108.38.237',
     queue_user='dominik',

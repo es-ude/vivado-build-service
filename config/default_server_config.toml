@@ -2,11 +2,3 @@
 #   Configure your server here and rename this file to 'server_config.toml' for changes to apply.
 [server]
 port = '{Your Server Port}'
-
-[paths]
-receive_folder = 'tmp/server'
-request_file = 'build.zip'
-result = '/result'
-tcl_script = 'scripts/tcl/create_project_full_run.tcl'
-bash_script = 'scripts/bash/autobuild_'
-constraints = 'scripts/constraints/env5_config.xdc'

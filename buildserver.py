@@ -2,24 +2,24 @@ import os
 import sys
 import logging
 import threading
-import subprocess
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
 import tomli
 
-from src.user_queue import UserQueue, Task
-from src.reset import move_log_and_jou_files
-from src.autobuild import run_vivado_autobuild
-from src.filehandler import configure_bash_scripts
-from src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
-from src.config import ServerConfig, GeneralConfig, default_general_config
+from vtrunner.user_queue import UserQueue, Task
+from vtrunner.reset import move_log_and_jou_files
+from vtrunner.autobuild import run_vivado_autobuild
+from vtrunner.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
+from vtrunner.config import ServerConfig, GeneralConfig, default_general_config
+from vtrunner.paths import ServerPaths, TMP_SERVER_DIR, TCL_SCRIPT, CONSTRAINTS_FILE
 
 
 class BuildServer:
     tcp_server: ThreadedTCPServer
 
     def __init__(self, server_config: ServerConfig, general_config: GeneralConfig = None):
+        self.paths: ServerPaths = init_paths()
         self._logger = logging.getLogger(__name__)
         self.server_config: ServerConfig = server_config
         if general_config:
@@ -32,8 +32,6 @@ class BuildServer:
         self._server_loop_thread.daemon = True
         self._server_thread = None
         self._executor = ThreadPoolExecutor(max_workers=self.server_config.num_workers)
-        bash_dir = os.path.dirname(self.server_config.bash_script)
-        configure_bash_scripts(bash_dir)
 
     def start(self):
         self._server_loop_thread.start()
@@ -43,6 +41,7 @@ class BuildServer:
                                             self.user_queue,
                                             self.server_config,
                                             self.shutdown_event,
+                                            server_paths=self.paths,
                                             general_config=self.general_config
                                             )
         self._server_thread = threading.Thread(target=self.tcp_server.serve_forever)
@@ -59,7 +58,7 @@ class BuildServer:
             task: Task = self.user_queue.dequeue_task()
             if task is not None:
                 is_test = self.general_config.is_test
-                self._executor.submit(execute, task, self.server_config, shutdown_event, is_test)
+                self._executor.submit(execute, task, self.paths, shutdown_event, is_test)
 
     def stop(self):
         self._logger.info("Shutting down...")
@@ -69,7 +68,16 @@ class BuildServer:
         self._logger.info("Shutdown complete.")
 
 
-def execute(task: Task, server_config: ServerConfig, event, is_test):
+def init_paths() -> ServerPaths:
+    paths = ServerPaths(
+        tcl_script=TCL_SCRIPT,
+        constraints=CONSTRAINTS_FILE,
+        receive_folder=TMP_SERVER_DIR,
+    )
+    return paths
+
+
+def execute(task: Task, paths: ServerPaths, event, is_test):
     logger = logging.getLogger(__name__)
     if event.is_set():
         return
@@ -84,10 +92,10 @@ def execute(task: Task, server_config: ServerConfig, event, is_test):
     if not is_test:
         logger.info("Running Vivado\n")
         run_vivado_autobuild(
-            server_config.tcl_script,
+            paths.tcl_script,
             task_path,
             result_dir,
-            server_config.constraints,
+            paths.constraints,
             task.bin_file_path,
             task.model_number
         )
@@ -116,12 +124,7 @@ def load_server_config_from_toml(path: Path) -> ServerConfig:
     with open(path, 'rb') as f:
         config = tomli.load(f)
     return ServerConfig(
-        server_vivado_user=config['server']['vivado_user'],
         server_port=int(config['server']['port']),
-        tcl_script=os.path.abspath(config['paths']['tcl_script']),
-        constraints=os.path.abspath(config['paths']['constraints']),
-        bash_script=os.path.abspath(config['paths']['bash_script'] + 'unix.sh'),
-        receive_folder=os.path.abspath(config['paths']['receive_folder']),
     )
 
 
