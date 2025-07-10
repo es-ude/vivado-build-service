@@ -5,13 +5,13 @@ import socketserver
 import time
 from pathlib import Path
 
-from vtrunner.report_parser import create_toml_from_vivado_report
-from vtrunner.task_factory import task_from_raw_request
-from vtrunner.user_queue import Task, UserQueue
-from vtrunner.config import GeneralConfig
-from vtrunner.streamutil import end_reached
-from vtrunner.filehandler import (make_personal_dir_and_get_task, deserialize,
-                                  unpack, get_filepaths, pack, serialize, get_report_file_paths)
+from vbservice.src.report_parser import create_toml_from_vivado_report
+from vbservice.src.task_factory import task_from_raw_request
+from vbservice.src.user_queue import Task, UserQueue
+from vbservice.src.config import GeneralConfig
+from vbservice.src.streamutil import end_reached
+from vbservice.src.filehandler import (make_personal_dir_and_get_task, deserialize,
+                                       unpack, get_filepaths, pack, serialize, get_report_file_paths)
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):

@@ -14,10 +14,10 @@ from distutils.dir_util import copy_tree
 
 import tomli
 
-from vtrunner.streamutil import join_streams
-from vtrunner.paths import ClientPaths, TMP_CLIENT_DIR
-from vtrunner.config import ClientConfig, GeneralConfig, default_general_config
-from vtrunner.filehandler import make_personal_dir_and_get_task, get_filepaths, serialize, pack, unpack, deserialize
+from vbservice.src.streamutil import join_streams
+from vbservice.src.paths import ClientPaths, TMP_CLIENT_DIR
+from vbservice.src.config import ClientConfig, GeneralConfig, default_general_config
+from vbservice.src.filehandler import make_personal_dir_and_get_task, get_filepaths, serialize, pack, unpack, deserialize
 
 
 class Client:

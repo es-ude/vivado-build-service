@@ -3,8 +3,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from vtrunner.filehandler import get_filepaths, get_report_file_paths, get_filename
-from vtrunner.report_parser import create_toml_from_vivado_report
+from vbservice.src.filehandler import get_filepaths, get_report_file_paths, get_filename
+from vbservice.src.report_parser import create_toml_from_vivado_report
 
 
 def run_vivado_autobuild(tcl_script, build_folder, result_folder, constraints, bin_mode, tcl_args):

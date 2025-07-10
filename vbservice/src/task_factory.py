@@ -1,8 +1,8 @@
 import os
 import logging
-from vtrunner.user_queue import Task
-from vtrunner.streamutil import split_stream, remove_delimiter
-from vtrunner.filehandler import make_personal_dir_and_get_task, deserialize, unpack
+from vbservice.src.user_queue import Task
+from vbservice.src.streamutil import split_stream, remove_delimiter
+from vbservice.src.filehandler import make_personal_dir_and_get_task, deserialize, unpack
 
 
 def task_from_raw_request(raw_data: bytes, general_config, receive_folder: str) -> Task:

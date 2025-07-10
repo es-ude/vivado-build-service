@@ -7,12 +7,12 @@ from concurrent.futures import ThreadPoolExecutor
 
 import tomli
 
-from vtrunner.user_queue import UserQueue, Task
-from vtrunner.reset import move_log_and_jou_files
-from vtrunner.autobuild import run_vivado_autobuild
-from vtrunner.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
-from vtrunner.config import ServerConfig, GeneralConfig, default_general_config
-from vtrunner.paths import ServerPaths, TMP_SERVER_DIR, TCL_SCRIPT, CONSTRAINTS_FILE
+from vbservice.src.user_queue import UserQueue, Task
+from vbservice.src.reset import move_log_and_jou_files
+from vbservice.src.autobuild import run_vivado_autobuild
+from vbservice.src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
+from vbservice.src.config import ServerConfig, GeneralConfig, default_general_config
+from vbservice.src.paths import ServerPaths, TMP_SERVER_DIR, TCL_SCRIPT, CONSTRAINTS_FILE
 
 
 class BuildServer:
