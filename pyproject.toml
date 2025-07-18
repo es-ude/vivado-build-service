@@ -5,7 +5,7 @@ description = "This tool is designed to automate Vivado simulations by enabling 
 readme = "README.md"
 authors = [
     { name = "Lukas Einhaus", email = "lukas.einhaus@uni-due.de" },
-    { name = "Dominik Sukic", email = "dominik.sukic@uni-due.de" }
+    { name = "Dominik Sukic", email = "dominik.sukic@uni-due.de" },
 ]
 requires-python = ">=3.12"
 dependencies = [
@@ -14,6 +14,10 @@ dependencies = [
     "vivado-report-parser>=0.5.0",
     "websockets>=15.0.1",
 ]
+
+[project.scripts]
+vbservice-client = "vbservice.client:main"
+vbservice-server = "vbservice.server:main"
 
 [build-system]
 requires = ["hatchling"]
