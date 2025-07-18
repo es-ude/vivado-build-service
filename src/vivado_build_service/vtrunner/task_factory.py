@@ -1,8 +1,8 @@
 import os
 import logging
-from vtrunner.user_queue import Task
-from vtrunner.streamutil import split_stream, remove_delimiter
-from vtrunner.filehandler import make_personal_dir_and_get_task, deserialize, unpack
+from .user_queue import Task
+from .streamutil import split_stream, remove_delimiter
+from .filehandler import make_personal_dir_and_get_task, deserialize, unpack
 
 
 def task_from_raw_request(raw_data: bytes, general_config, receive_folder: str) -> Task:
@@ -13,8 +13,10 @@ def task_from_raw_request(raw_data: bytes, general_config, receive_folder: str) 
 
     data = remove_delimiter(stream, general_config.delimiter)
 
-    task = make_personal_dir_and_get_task(client_username, receive_folder, model_number, only_bin_file)
-    filepath = os.path.join(task.path, 'build.zip')
+    task = make_personal_dir_and_get_task(
+        client_username, receive_folder, model_number, only_bin_file
+    )
+    filepath = os.path.join(task.path, "build.zip")
 
     deserialize(data, filepath)
     status = unpack(filepath, task.path)

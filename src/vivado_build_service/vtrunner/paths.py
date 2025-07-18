@@ -1,7 +1,7 @@
 from importlib.resources import files
 import dataclasses
 
-PACKAGE_ROOT = files("vtrunner")
+PACKAGE_ROOT = files("vivado_build_service.vtrunner")
 
 TMP_CLIENT_DIR = "tmp/client"
 TMP_SERVER_DIR = "tmp/server"
