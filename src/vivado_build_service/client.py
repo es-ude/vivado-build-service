@@ -10,7 +10,7 @@ import subprocess
 from pathlib import Path
 from typing import Tuple
 from contextlib import closing
-from distutils.dir_util import copy_tree
+from shutil import copytree as copy_tree
 import tomli
 
 from .vtrunner.streamutil import join_streams
