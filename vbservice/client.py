@@ -42,7 +42,7 @@ class Client:
         return cls(config)
 
     def build(self, upload_dir, model_number, download_dir, only_bin_files=True):
-        self.download_dir = download_dir
+        self.download_dir = make_unique_dir(download_dir)
         request = self._prepare_request(upload_dir)
 
         data = join_streams([
@@ -212,6 +212,18 @@ def parse_sys_argv(default_config_path):
         only_bin_files = False
 
     return username, upload_data_folder, model_number, download_data_folder, config_path, only_bin_files
+
+
+def make_unique_dir(download_dir):
+    files = os.listdir(download_dir)
+    job_numbers = [0]
+    for file in files:
+        if file.startswith("project_"):
+            job_numbers.append(int(file.split("_")[-1]))
+    job_number = max(job_numbers) + 1
+    directory = os.path.join(download_dir, f"project_{str(job_number)}")
+    os.makedirs(directory, exist_ok=True)
+    return directory
 
 
 def main():
