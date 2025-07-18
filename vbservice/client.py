@@ -8,23 +8,19 @@ import logging
 import threading
 import subprocess
 from pathlib import Path
-from typing import Tuple
 from contextlib import closing
-from distutils.dir_util import copy_tree
 
 import tomli
 
-from vtrunner.streamutil import join_streams
-from vtrunner.paths import ClientPaths, TMP_CLIENT_DIR
-from vtrunner.config import ClientConfig, GeneralConfig, default_general_config
-from vtrunner.filehandler import make_personal_dir_and_get_task, get_filepaths, serialize, pack, unpack, deserialize
+from vbservice.src.streamutil import join_streams
+from vbservice.config import ClientConfig, GeneralConfig, default_general_config
+from vbservice.src.filehandler import get_filepaths, serialize, pack, unpack, deserialize
 
 
 class Client:
     def __init__(self, client_config: ClientConfig, general_config: GeneralConfig = None):
-        self.paths: ClientPaths = init_paths()
         self._logger = logging.getLogger(__name__)
-        self.task_dir = None
+
         self.client_config = client_config
         if general_config:
             self.general_config = general_config
@@ -45,11 +41,10 @@ class Client:
         )
         return cls(config)
 
-    def build(self, upload_dir, model_number, download_dir=None, only_bin_files=True):
-        self.only_bin = only_bin_files
-        self.model_number = model_number
-        request, task_dir = self._prepare_request(upload_dir, self.client_config.queue_user)
-        self.task_dir = task_dir
+    def build(self, upload_dir, model_number, download_dir, only_bin_files=True):
+        self.download_dir = make_unique_dir(download_dir)
+        request = self._prepare_request(upload_dir)
+
         data = join_streams([
                 self.client_config.queue_user.encode(),
                 model_number.encode(),
@@ -58,6 +53,7 @@ class Client:
         ], self.general_config.delimiter.encode())
         s = self._connect_with_socket()
         response = self._send_and_receive(s, data)
+
         result_dir = self._process_response(response)
         self.stop_loading_animation_event.set()
 
@@ -72,8 +68,6 @@ class Client:
                 time.sleep(1)
                 with open(bf, "r") as f:
                     print(f.read())
-        if download_dir:
-            copy_tree(src=result_dir, dst=download_dir)
         s.close()
 
     def _forward_port(self):
@@ -83,14 +77,6 @@ class Client:
             self.client_config.server_ip_address
         )
         subprocess.Popen(ssh_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
-
-    def _prepare_request(self, upload_directory: str, user: str) -> Tuple[str, str]:
-        file_list = get_filepaths(upload_directory)
-        task = make_personal_dir_and_get_task(user, self.paths.send_dir, self.model_number, self.only_bin)
-        target_filepath = os.path.join(*[task.path, 'build.zip'])
-        pack(base_folder=upload_directory, origin=file_list, destination=target_filepath)
-
-        return serialize(target_filepath), task.path
 
     def _send_and_receive(self, s: socket, data):
         loading_animation = threading.Thread(target=self._print_loading_animation)
@@ -168,8 +154,17 @@ class Client:
             if self.stop_loading_animation_event.is_set():
                 break
 
+    def _prepare_request(self, upload_directory: str) -> str:
+        file_list = get_filepaths(upload_directory)
+        target_filepath = os.path.join(upload_directory, 'build.zip')
+        pack(base_folder=upload_directory, origin=file_list, destination=target_filepath)
+        request = serialize(target_filepath)
+        unpack(target_filepath, self.download_dir)
+        os.remove(target_filepath)
+        return request
+
     def _process_response(self, data):
-        result_dir = self.task_dir + '/result'
+        result_dir = self.download_dir + '/result'
         zip_file = result_dir + '/result.zip'
 
         os.mkdir(result_dir)
@@ -181,11 +176,6 @@ class Client:
         os.remove(zip_file)
 
         return result_dir
-
-
-def init_paths() -> ClientPaths:
-    paths = ClientPaths(send_dir=TMP_CLIENT_DIR)
-    return paths
 
 
 def find_bin_files(directory):
@@ -222,6 +212,18 @@ def parse_sys_argv(default_config_path):
         only_bin_files = False
 
     return username, upload_data_folder, model_number, download_data_folder, config_path, only_bin_files
+
+
+def make_unique_dir(download_dir):
+    files = os.listdir(download_dir)
+    job_numbers = [0]
+    for file in files:
+        if file.startswith("project_"):
+            job_numbers.append(int(file.split("_")[-1]))
+    job_number = max(job_numbers) + 1
+    directory = os.path.join(download_dir, f"project_{str(job_number)}")
+    os.makedirs(directory, exist_ok=True)
+    return directory
 
 
 def main():

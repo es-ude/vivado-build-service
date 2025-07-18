@@ -4,7 +4,7 @@ import zipfile
 from pathlib import Path
 from zipfile import ZipFile
 
-from vtrunner.user_queue import Task
+from vbservice.src.user_queue import Task
 
 
 def make_personal_dir_and_get_task(user, directory, model_number, only_bin) -> Task:

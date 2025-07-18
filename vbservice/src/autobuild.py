@@ -3,16 +3,16 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from vtrunner.filehandler import get_filepaths, get_report_file_paths, get_filename
-from vtrunner.report_parser import create_toml_from_vivado_report
+from vbservice.src.filehandler import get_filepaths, get_report_file_paths, get_filename
+from vbservice.src.report_parser import create_toml_from_vivado_report
 
 
-def run_vivado_autobuild(tcl_script, build_folder, result_folder, constraints, bin_mode, tcl_args):
+def run_vivado_autobuild(tcl_script, build_folder, result_folder, bin_mode, tcl_args):
     log = get_log(result_folder)
     try:
         clear_autobuild()
         make_directories()
-        copy_task_files(constraints, build_folder)
+        copy_task_files(build_folder)
         vivado_command, env = set_vivado_environment(tcl_script, tcl_args)
         run_vivado(vivado_command, env, log)
         copy_autobuild_files(log)
@@ -39,9 +39,11 @@ def make_directories():
     os.makedirs(os.path.expanduser("~/.autobuild/toml"), exist_ok=True)
 
 
-def copy_task_files(constraints, build_folder):
-    shutil.copy(constraints, os.path.expanduser("~/.autobuild/input_srcs/constraints"))
-    shutil.copytree(build_folder, os.path.expanduser("~/.autobuild/input_srcs/srcs"), dirs_exist_ok=True)
+def copy_task_files(build_folder):
+    constraints = os.path.join(build_folder, "constraints")
+    sources = os.path.join(build_folder, "srcs")
+    shutil.copytree(constraints, os.path.expanduser("~/.autobuild/input_srcs/constraints"), dirs_exist_ok=True)
+    shutil.copytree(sources, os.path.expanduser("~/.autobuild/input_srcs/srcs"), dirs_exist_ok=True)
 
 
 def set_vivado_environment(tcl_script, tcl_args):

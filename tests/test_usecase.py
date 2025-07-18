@@ -5,10 +5,10 @@ import filecmp
 import threading
 from unittest import TestCase
 
-from buildserver import BuildServer
-from client import Client
-from vtrunner.config import ClientConfig, ServerConfig
-from vtrunner.filehandler import delete_directories_in, clear
+from vbservice.buildserver import BuildServer
+from vbservice.client import Client
+from vbservice.config import ClientConfig, ServerConfig
+from vbservice.src.filehandler import delete_directories_in, clear
 
 
 class Test(TestCase):
