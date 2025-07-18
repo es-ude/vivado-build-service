@@ -1,4 +1,4 @@
-# 🚀 Vivado Simulation Automation Tool
+# Vivado Simulation Automation Tool
 
 This tool automates Vivado simulations by allowing clients to submit build files to a server over a socket connection, streamlining FPGA development workflows.
 
@@ -7,28 +7,27 @@ This tool automates Vivado simulations by allowing clients to submit build files
 ## 🔧 Client-Side Installation
 
 1. Ensure [`uv`](https://github.com/astral-sh/uv) is installed.
-2. Clone this repository:
+2. Ensure you use python version 3.12 or higher
+3. Locate your project directory and install the tool using uv:
 
    ```bash
-   git clone https://your-repo-url.git
-   cd your-repo-directory
-   ```
-
-3. Install dependencies:
-
-   ```bash
-   uv install
+   uv pip install "git+https://github.com/es-ude/vivado-build-service.git"
    ```
 
 ---
 
 ## 🖥️ Server-Side Installation
 
-Start the build server using:
+1. Clone and locate the repository:
+   ```bash
+   git clone https://github.com/es-ude/vivado-build-service
+   cd vivado-build-service
+   ```
+2. Start the build server using:
 
-```bash
-python3 -m vbservice.buildserver
-```
+   ```bash
+   python3 -m vbservice.buildserver
+   ```
 
 ---
 
@@ -37,8 +36,8 @@ python3 -m vbservice.buildserver
 ### 1. Import Required Classes
 
 ```python
-from vbservice.client import Client
-from vbservice.config import ClientConfig, ServerConfig
+from vbservice import Client
+from vbservice import ClientConfig, ServerConfig
 ```
 
 ---
@@ -72,7 +71,7 @@ client.build(
     upload_dir='path/to/your/vhdl/files',      # Path to your VHDL build files
     download_dir='path/to/save/results',       # Directory to store the generated files
     model_number='fpga_model_123',             # Your specific FPGA model number
-    only_bin_files=True                        # Set to True to download only .bin files
+    only_bin_files=True                        # Set to True to download only .bin files, logs, and reports
 )
 ```
 
