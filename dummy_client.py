@@ -1,5 +1,5 @@
 from vbservice.client import Client
-from vbservice.src.config import ClientConfig
+from vbservice.config import ClientConfig
 
 client_config = ClientConfig(
     server_port=2025,

@@ -11,8 +11,8 @@ from vbservice.src.user_queue import UserQueue, Task
 from vbservice.src.reset import move_log_and_jou_files
 from vbservice.src.autobuild import run_vivado_autobuild
 from vbservice.src.threaded_tcp_handler import ThreadedTCPHandler, ThreadedTCPServer
-from vbservice.src.config import ServerConfig, GeneralConfig, default_general_config
-from vbservice.src.paths import ServerPaths, TMP_SERVER_DIR, TCL_SCRIPT, CONSTRAINTS_FILE
+from vbservice.config import ServerConfig, GeneralConfig, default_general_config
+from vbservice.src.paths import ServerPaths, DATA_DIRECTORY, TCL_SCRIPT
 
 
 class BuildServer:
@@ -71,8 +71,7 @@ class BuildServer:
 def init_paths() -> ServerPaths:
     paths = ServerPaths(
         tcl_script=TCL_SCRIPT,
-        constraints=CONSTRAINTS_FILE,
-        receive_folder=TMP_SERVER_DIR,
+        receive_folder=DATA_DIRECTORY,
     )
     return paths
 
@@ -95,7 +94,6 @@ def execute(task: Task, paths: ServerPaths, event, is_test):
             paths.tcl_script,
             task_path,
             result_dir,
-            paths.constraints,
             task.bin_file_path,
             task.model_number
         )

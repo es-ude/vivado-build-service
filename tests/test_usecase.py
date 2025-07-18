@@ -7,7 +7,7 @@ from unittest import TestCase
 
 from vbservice.buildserver import BuildServer
 from vbservice.client import Client
-from vbservice.src.config import ClientConfig, ServerConfig
+from vbservice.config import ClientConfig, ServerConfig
 from vbservice.src.filehandler import delete_directories_in, clear
 
 

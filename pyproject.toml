@@ -1,10 +1,11 @@
 [project]
-name = "vivado-build-service"
+name = "vbservice"
 version = "0.1.0"
-description = "Add your description here"
+description = "This tool is designed to automate Vivado simulations by enabling clients to submit their build files to a server over a socket connection."
 readme = "README.md"
 authors = [
-    { name = "Lukas Einhaus", email = "lukas.einhaus@uni-due.de" }
+    { name = "Lukas Einhaus", email = "lukas.einhaus@uni-due.de" },
+    { name = "Dominik Sukic", email = "dominik.sukic@uni-due.de" }
 ]
 requires-python = ">=3.12"
 dependencies = [
