@@ -42,7 +42,7 @@ def make_directories():
 def copy_task_files(build_folder):
     constraints = os.path.join(build_folder, "constraints")
     sources = os.path.join(build_folder, "srcs")
-    shutil.copytree(constraints, os.path.expanduser("~/.autobuild/input_srcs/constraints"))
+    shutil.copytree(constraints, os.path.expanduser("~/.autobuild/input_srcs/constraints"), dirs_exist_ok=True)
     shutil.copytree(sources, os.path.expanduser("~/.autobuild/input_srcs/srcs"), dirs_exist_ok=True)
 
 
