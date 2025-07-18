@@ -8,7 +8,8 @@ This tool automates Vivado simulations by allowing clients to submit build files
 
 1. Ensure [`uv`](https://github.com/astral-sh/uv) is installed.
 2. Ensure you use python version 3.12 or higher
-3. Locate your project directory and install the tool using uv:
+3. After having generated an ssh key pair, make sure that an admin has added your public ssh key to the server
+4. Locate your project directory and install the tool using uv:
 
    ```bash
    uv pip install "git+https://github.com/es-ude/vivado-build-service.git"
