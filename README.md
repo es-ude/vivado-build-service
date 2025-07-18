@@ -23,7 +23,9 @@ This tool automates Vivado simulations by allowing clients to submit build files
    git clone https://github.com/es-ude/vivado-build-service
    cd vivado-build-service
    ```
-2. Start the build server using:
+2. Configure the server port inside config/default_server_config.toml and save the config file as server_config.toml
+
+3. Start the build server using:
 
    ```bash
    python3 -m vbservice.buildserver
@@ -37,7 +39,7 @@ This tool automates Vivado simulations by allowing clients to submit build files
 
 ```python
 from vbservice import Client
-from vbservice import ClientConfig, ServerConfig
+from vbservice import ClientConfig
 ```
 
 ---
