@@ -220,19 +220,19 @@ def find_bin_files(directory):
     return bin_files
 
 
-def parse_sys_argv(default_config_path):
-    username = sys.argv[1]
-    upload_data_folder = sys.argv[2]
-    model_number = sys.argv[3]
+def parse_sys_argv(default_config_path, argv):
+    username = argv[1]
+    upload_data_folder = argv[2]
+    model_number = argv[3]
 
-    for arg in sys.argv[4:]:
+    for arg in argv[4:]:
         if os.path.isdir(arg):
             download_data_folder = Path(arg)
             break
     else:
         download_data_folder = None
 
-    for arg in sys.argv[4:]:
+    for arg in argv[4:]:
         if arg.endswith(".toml"):
             config_path = Path(arg)
             break
@@ -274,6 +274,10 @@ def main():
         format="{levelname}::{filename}:{lineno}:\t{message}",
         style="{",
     )
+    argv = sys.argv
+    if len(argv) not in (5, 6):
+        print(main.__doc__)
+        return
     default_config = Path("config/client_config.toml")
     (
         username,
@@ -282,7 +286,7 @@ def main():
         download_data_folder,
         config_path,
         only_bin_files,
-    ) = parse_sys_argv(default_config)
+    ) = parse_sys_argv(default_config, argv)
     client = Client.from_config(config_path)
     client.client_config.queue_user = username
     client.build(upload_data_folder, model_number, download_data_folder, only_bin_files)
