@@ -1,10 +1,12 @@
 import os
+import shutil
 import sys
 import math
 import time
 import socket
 import select
 import logging
+import platform
 import threading
 import subprocess
 from pathlib import Path
@@ -76,7 +78,22 @@ class Client:
             self.client_config.server_port,
             self.client_config.server_ip_address
         )
-        subprocess.Popen(ssh_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
+        if platform_is("Linux"):
+            terminal = _get_linux_terminal()
+            if terminal:
+                subprocess.Popen([terminal, "-e", ssh_command])
+            else:
+                raise EnvironmentError("No supported terminal emulator found on this system.")
+        elif platform_is("Windows"):
+            subprocess.Popen(ssh_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
+        elif platform_is("macOS"):
+            osa_command = f'''
+            tell application "Terminal"
+                do script "{ssh_command}"
+                activate
+            end tell
+            '''
+            subprocess.Popen(["osascript", "-e", osa_command])
 
     def _send_and_receive(self, s: socket, data):
         loading_animation = threading.Thread(target=self._print_loading_animation)
@@ -176,6 +193,31 @@ class Client:
         os.remove(zip_file)
 
         return result_dir
+
+
+def platform_is(system: str) -> bool:
+    if platform.system == system:
+        return True
+    if system == "macOS" and platform.system == "Darwin":
+        return True
+    return False
+
+
+def _get_linux_terminal():
+    terminals = [
+        "x-terminal-emulator",
+        "gnome-terminal",
+        "konsole",
+        "xfce4-terminal",
+        "lxterminal",
+        "xterm",
+        "terminator",
+        "mate-terminal"
+    ]
+    for term in terminals:
+        if shutil.which(term):
+            return term
+    return None
 
 
 def find_bin_files(directory):
