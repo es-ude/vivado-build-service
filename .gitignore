@@ -1,9 +1,3 @@
-# Server/Client messaging
-/tmp/server/*
-!tmp/server/info.md
-/tmp/client/*
-!tmp/client/info.md
-
 # Testing environment messaging
 /tests/testing-environment/tmp/server/*
 !tests/testing-environment/tmp/server/info.md
