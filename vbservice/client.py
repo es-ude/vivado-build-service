@@ -215,13 +215,16 @@ class Client:
 
 
 def platform_is(system: str) -> bool:
-    if platform.system == system:
+    current_system = platform.system().lower()
+    requested_system = system.lower()
+    if current_system == requested_system:
         return True
-    if system == "macOS" and platform.system == "Darwin":
+    if requested_system == "macos" and current_system == "darwin":
         return True
     return False
 
 
+# noinspection SpellCheckingInspection
 def _get_linux_terminal():
     terminals = [
         "x-terminal-emulator",
@@ -308,6 +311,8 @@ def main():
 
     Arguments download_dir, config_path and -b are optional.
     """
+
+    # noinspection SpellCheckingInspection
     logging.basicConfig(
         level=logging.DEBUG,
         force=True,

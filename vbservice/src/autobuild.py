@@ -46,6 +46,7 @@ def copy_task_files(build_folder):
     shutil.copytree(sources, os.path.expanduser("~/.autobuild/input_srcs/srcs"), dirs_exist_ok=True)
 
 
+# noinspection SpellCheckingInspection
 def set_vivado_environment(tcl_script, tcl_args):
     env = os.environ.copy()
     env["XILINXD_LICENSE_FILE"] = "/opt/flexlm/Xilinx.lic"

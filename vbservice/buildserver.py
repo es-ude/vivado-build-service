@@ -134,6 +134,7 @@ def main():
     else:
         config_path = default_config_path
 
+    # noinspection SpellCheckingInspection
     logging.basicConfig(
         level=logging.DEBUG, force=True,
         format="{levelname}::{filename}:{lineno}:\t{message}", style="{",

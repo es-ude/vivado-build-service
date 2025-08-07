@@ -12,6 +12,7 @@ from vbservice.src.filehandler import delete_directories_in, clear
 
 
 class Test(TestCase):
+    # noinspection SpellCheckingInspection
     logging.basicConfig(
         level=logging.DEBUG, force=True,
         format="{levelname}::{filename}:{lineno}:\t{message}", style="{",
@@ -47,6 +48,7 @@ class Test(TestCase):
             s.start()
 
         def threaded_client(c: Client):
+            # noinspection SpellCheckingInspection
             c.build(
                 upload_dir='tests/build_dir',
                 download_dir=self.download_directory,
