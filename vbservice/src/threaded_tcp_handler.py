@@ -104,13 +104,13 @@ def search_bin(directory):
 
 
 def prepare_response(result_directory):
-    reports = get_reports(result_directory)
-    reports_directory = get_report_dir(result_directory)
-
-    for report in reports:
-        shutil.copy(report, reports_directory)
-
-    create_toml_reports(result_directory)
+    # reports = get_reports(result_directory)
+    # reports_directory = get_report_dir(result_directory)
+    #
+    # for report in reports:
+    #     shutil.copy(report, reports_directory)
+    #
+    # create_toml_reports(result_directory)
 
     new_zip = os.path.join(result_directory, 'result.zip')
     all_files = get_filepaths(result_directory)
