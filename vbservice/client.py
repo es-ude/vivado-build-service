@@ -38,6 +38,7 @@ class Client:
             self.general_config = default_general_config
         if not self.general_config.is_test:
             self._forward_port()
+            wait_for_port("localhost", self.client_config.server_port)
         self.stop_loading_animation_event = threading.Event()
 
     @classmethod
@@ -242,6 +243,20 @@ def _get_linux_terminal():
     return None
 
 
+def wait_for_port(host: str, port: int, timeout: float = 10.0, interval: float = 0.2) -> None:
+    deadline = time.monotonic() + timeout
+    last_err = None
+    while True:
+        try:
+            with socket.create_connection((host, port), timeout=0.5):
+                return  # success: port is listening
+        except OSError as e:
+            last_err = e
+            if time.monotonic() >= deadline:
+                raise TimeoutError(f"Timed out waiting for {host}:{port} to listen") from last_err
+            time.sleep(interval)
+
+
 def find_bin_files(directory):
     bin_files = []
     for root, _, files in os.walk(directory):
@@ -301,6 +316,7 @@ def main():
     """
     A correct call from the command line looks like this:
         client.py {username} {upload_dir} {model_number} {download_dir} {config_path} {-b}
+        python client.py {username} {upload_dir} {model_number} {download_dir} {config_path} {-b}
 
     username        User that connects to the server
     upload_dir      Directory where the build files are located
