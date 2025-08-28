@@ -38,7 +38,9 @@ class Client:
             self.general_config = default_general_config
         if not self.general_config.is_test:
             self._forward_port()
-            wait_for_port("localhost", self.client_config.server_port)
+            # wait_for_port leads to server error. Use time.sleep instead to avoid race condition
+            time.sleep(1)
+            # wait_for_port("localhost", self.client_config.server_port)
         self.stop_loading_animation_event = threading.Event()
 
     @classmethod
