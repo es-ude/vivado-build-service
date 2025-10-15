@@ -48,10 +48,12 @@ from vbservice import ClientConfig
 
 ### 2. Configure the Client
 
+Ask an administrator for the correct server port and ip address
+
 ```python
 client_config = ClientConfig(
     server_port=1234,                    # Port where the build server is running
-    server_ip_address='192.168.0.1',     # IP address of the build server
+    server_ip_address='127.0.0.1',       # IP address of the build server
     queue_user='your_username',          # Your unique username for the build queue
 )
 ```
@@ -82,3 +84,4 @@ client.build(
 ---
 
 For any issues or contributions, please refer to the [issues](https://github.com/es-ude/vivado-build-service/issues) section of the repository.
+
