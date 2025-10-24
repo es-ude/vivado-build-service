@@ -52,9 +52,9 @@ Ask an administrator for the correct server port and ip address
 
 ```python
 client_config = ClientConfig(
-    server_port=1234,                    # Port where the build server is running
-    server_ip_address='127.0.0.1',       # IP address of the build server
-    queue_user='your_username',          # Your unique username for the build queue
+    server_port=1234,                    # int: Port where the build server is running
+    server_ip_address='127.0.0.1',       # str: IP address of the build server
+    queue_user='your_username',          # str: Your unique username for the build queue
 )
 ```
 
@@ -74,14 +74,15 @@ Call the `build()` method to send a synthesis request and retrieve generated fil
 
 ```python
 client.build(
-    upload_dir='path/to/your/vhdl/files',      # Path to your VHDL build files
-    download_dir='path/to/save/results',       # Directory to store the generated files
-    model_number='fpga_model_123',             # Your specific FPGA model number
-    only_bin_files=True                        # Set to True to download only .bin files, logs, and reports
+    upload_dir='path/to/your/vhdl/files',      # str: Path to your VHDL build files
+    download_dir='path/to/save/results',       # str: Directory to store the generated files
+    model_number='fpga_model_123',             # str: Your specific FPGA model number
+    only_bin_files=True                        # bool: Set to True to download only .bin files, logs, and reports
 )
 ```
 
 ---
 
 For any issues or contributions, please refer to the [issues](https://github.com/es-ude/vivado-build-service/issues) section of the repository.
+
 
