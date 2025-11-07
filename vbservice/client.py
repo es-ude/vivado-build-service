@@ -55,6 +55,8 @@ class Client:
         return cls(config)
 
     def build(self, upload_dir, model_number, download_dir, only_bin_files=True):
+        self._logger.info(f"Sending project files to Vivado Build Server for {self.client_config.queue_user}.\n")
+
         self.download_dir = make_unique_dir(download_dir)
         request = self._prepare_request(upload_dir)
 
@@ -86,6 +88,8 @@ class Client:
                 time.sleep(1)
                 with open(bf, "r") as f:
                     print(f.read())
+
+        self._logger.info("\nVivado Build Server Finished.")
         s.close()
 
     def _forward_port(self):
@@ -316,18 +320,7 @@ def make_unique_dir(download_dir):
 
 def main():
     """
-    A correct call from the command line looks like this:
-        client.py {username} {upload_dir} {model_number} {download_dir} {config_path} {-b}
-        python client.py {username} {upload_dir} {model_number} {download_dir} {config_path} {-b}
-
-    username        User that connects to the server
-    upload_dir      Directory where the build files are located
-    model_number    Model number of the FPGA that is being used
-    download_dir    Directory where output files should be downloaded
-    config_path     Path to a client_config.toml file
-    -b              If flag is present, only bin files will be downloaded
-
-    Arguments download_dir, config_path and -b are optional.
+        Calling client.py from the command line is currently not supported.
     """
 
     # noinspection SpellCheckingInspection
