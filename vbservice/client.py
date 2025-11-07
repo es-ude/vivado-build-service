@@ -55,7 +55,7 @@ class Client:
         return cls(config)
 
     def build(self, upload_dir, model_number, download_dir, only_bin_files=True):
-        self._logger.info(f"Sending project files to Vivado Build Server for {self.client_config.queue_user}.\n")
+        print(f"Sending project files to Vivado Build Server for {self.client_config.queue_user}.\n")
 
         self.download_dir = make_unique_dir(download_dir)
         request = self._prepare_request(upload_dir)
@@ -89,7 +89,7 @@ class Client:
                 with open(bf, "r") as f:
                     print(f.read())
 
-        self._logger.info("\nVivado Build Server Finished.")
+        print("\nVivado Build Server Finished.")
         s.close()
 
     def _forward_port(self):
